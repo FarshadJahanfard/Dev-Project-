@@ -1,0 +1,269 @@
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { CalendarIcon, Clock, MapPin, Phone } from "lucide-react"
+import Link from "next/link"
+import Image from "next/image"
+import { Label } from "@/components/ui/label"
+import { Calendar } from "@/components/ui/calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { format } from "date-fns"
+import { useState } from "react"
+import { Textarea } from "@/components/ui/textarea"
+
+export default function Home() {
+  const [date, setDate] = useState<Date>()
+  return (
+    <div className="min-h-screen bg-background">
+      <header className="absolute top-0 left-0 right-0 z-50">
+        <div className="container flex h-20 items-center justify-between px-4">
+          <div className="flex items-center gap-6">
+            <Link href="/" className="text-2xl font-playfair font-bold">
+              ZenFlow
+            </Link>
+          </div>
+          <div className="flex items-center gap-4">
+            <Link href="/admin">
+              <Button variant="ghost" size="sm" className="h-8">
+                Admin Login
+              </Button>
+            </Link>
+            <Button size="sm" className="h-8 bg-secondary hover:bg-secondary/90 text-primary">
+              Book Now
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="/placeholder.svg?height=1080&width=1920"
+            alt="Restaurant ambiance"
+            fill
+            className="object-cover brightness-50"
+            priority
+          />
+        </div>
+        <div className="relative z-10 text-center text-white px-4 max-w-3xl mx-auto">
+          <h1 className="font-playfair text-4xl md:text-6xl font-bold mb-4">Experience Culinary Excellence</h1>
+          <p className="text-lg md:text-xl text-white/90 mb-8">
+            Indulge in an unforgettable dining experience at our award-winning restaurant
+          </p>
+          <Button
+            size="lg"
+            className="bg-secondary hover:bg-secondary/90 text-primary"
+            onClick={() => document.getElementById("reservation-form")?.scrollIntoView({ behavior: "smooth" })}
+          >
+            Make a Reservation
+          </Button>
+        </div>
+      </section>
+
+      <section className="py-20 bg-muted">
+        <div className="container px-4">
+          <div className="grid gap-8 md:grid-cols-3 max-w-5xl mx-auto">
+            <Card className="bg-card">
+              <CardHeader>
+                <Clock className="w-10 h-10 p-2 text-primary bg-secondary/20 rounded-lg mb-4" />
+                <CardTitle className="font-playfair">Opening Hours</CardTitle>
+                <CardDescription>Mon-Sun: 5:00 PM - 11:00 PM</CardDescription>
+              </CardHeader>
+            </Card>
+            <Card className="bg-card">
+              <CardHeader>
+                <MapPin className="w-10 h-10 p-2 text-primary bg-secondary/20 rounded-lg mb-4" />
+                <CardTitle className="font-playfair">Location</CardTitle>
+                <CardDescription>123 Gourmet Street, Culinary District</CardDescription>
+              </CardHeader>
+            </Card>
+            <Card className="bg-card">
+              <CardHeader>
+                <Phone className="w-10 h-10 p-2 text-primary bg-secondary/20 rounded-lg mb-4" />
+                <CardTitle className="font-playfair">Contact</CardTitle>
+                <CardDescription>+1 (555) 123-4567</CardDescription>
+              </CardHeader>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20" id="reservation-form">
+        <div className="container px-4">
+          <div className="max-w-2xl mx-auto">
+            <Card className="border-secondary/20">
+              <CardHeader className="text-center">
+                <CardTitle className="font-playfair text-3xl">Make a Reservation</CardTitle>
+                <CardDescription>Book your table for an unforgettable dining experience</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Name</Label>
+                    <Input id="name" placeholder="Enter your name" className="border-secondary/20" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input id="email" placeholder="Enter your email" type="email" className="border-secondary/20" />
+                  </div>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="date">Date</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          id="date"
+                          variant="outline"
+                          className="w-full justify-start text-left font-normal border-secondary/20"
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {date ? format(date, "PPP") : "Pick a date"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar mode="single" selected={date} onSelect={setDate} initialFocus />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  <div className="space-y-2.5">
+                    <Label htmlFor="time" className="text-base font-medium">
+                      Time
+                    </Label>
+                    <Select>
+                      <SelectTrigger className="border-secondary/20 h-11">
+                        <SelectValue placeholder="Select time" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="10:30">10:30 AM</SelectItem>
+                        <SelectItem value="11:30">11:30 AM</SelectItem>
+                        <SelectItem value="12:30">12:30 PM</SelectItem>
+                        <SelectItem value="13:30">1:30 PM</SelectItem>
+                        <SelectItem value="14:30">2:30 PM</SelectItem>
+                        <SelectItem value="15:30">3:30 PM</SelectItem>
+                        <SelectItem value="16:30">4:30 PM</SelectItem>
+                        <SelectItem value="17:30">5:30 PM</SelectItem>
+                        <SelectItem value="18:30">6:30 PM</SelectItem>
+                        <SelectItem value="19:30">7:30 PM</SelectItem>
+                        <SelectItem value="20:30">8:30 PM</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="guests">Number of Guests</Label>
+                  <Select>
+                    <SelectTrigger className="border-secondary/20">
+                      <SelectValue placeholder="Select number of guests" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">1 Guest</SelectItem>
+                      <SelectItem value="2">2 Guests</SelectItem>
+                      <SelectItem value="3">3 Guests</SelectItem>
+                      <SelectItem value="4">4 Guests</SelectItem>
+                      <SelectItem value="5">5 Guests</SelectItem>
+                      <SelectItem value="6">6 Guests</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="notes" className="text-base">
+                    Special Requests
+                  </Label>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Let us know if you have any dietary requirements or special preferences
+                  </p>
+                  <Textarea
+                    id="notes"
+                    placeholder="Any special requests or dietary requirements?"
+                    className="min-h-[120px] resize-none border-secondary/20"
+                  />
+                </div>
+              </CardContent>
+              <CardFooter className="flex flex-col gap-4">
+                <Button className="w-full bg-secondary hover:bg-secondary/90 text-primary">Request Reservation</Button>
+                <p className="text-center text-sm text-muted-foreground">
+                  Note: All reservations require confirmation from our staff. You will receive an email once your
+                  booking is confirmed.
+                </p>
+              </CardFooter>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      <footer className="bg-primary text-primary-foreground py-20">
+        <div className="container px-4">
+          <div className="grid gap-8 md:grid-cols-3 max-w-5xl mx-auto">
+            <div>
+              <h3 className="font-playfair text-xl mb-4">About Us</h3>
+              <p className="text-primary-foreground/80">
+                Experience the perfect blend of exceptional cuisine and elegant atmosphere at ZenFlow.
+              </p>
+            </div>
+            <div>
+              <h3 className="font-playfair text-xl mb-4">Opening Hours</h3>
+              <p className="text-primary-foreground/80">
+                Monday - Sunday
+                <br />
+                5:00 PM - 11:00 PM
+              </p>
+            </div>
+            <div>
+              <h3 className="font-playfair text-xl mb-4">Contact</h3>
+              <p className="text-primary-foreground/80">
+                123 Gourmet Street
+                <br />
+                Culinary District
+                <br />
+                +1 (555) 123-4567
+              </p>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  )
+}
+
+function Label({ children, ...props }: { children: React.ReactNode } & React.ComponentProps<"label">) {
+  return (
+    <label
+      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+      {...props}
+    >
+      {children}
+    </label>
+  )
+}
+
+function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
+  return (
+    <div className="space-y-3">
+      <textarea
+        className={`flex min-h-[80px] w-full rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
+        {...props}
+      />
+      <div className="rounded-lg bg-secondary/10 p-4 text-sm">
+        <p className="font-medium text-primary mb-1">Planning a larger gathering?</p>
+        <p className="text-muted-foreground">For parties of 7 or more, please contact us directly:</p>
+        <div className="mt-2 space-y-1">
+          <p>
+            <span className="text-muted-foreground">Phone: </span>
+            <a href="tel:+15551234567" className="text-secondary hover:underline">
+              +1 (555) 123-4567
+            </a>
+          </p>
+          <p>
+            <span className="text-muted-foreground">Email: </span>
+            <a href="mailto:reservations@zenflow.com" className="text-secondary hover:underline">
+              reservations@zenflow.com
+            </a>
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
