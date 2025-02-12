@@ -14,9 +14,8 @@ const playfair = Playfair_Display({
 })
 
 export const metadata = {
-  title: "ZenFlow - Luxury Dining Experience",
-  description: "Experience luxury dining with our sophisticated reservation system",
-    generator: 'v0.dev'
+  title: "ZenFlow - Fine Dining Experience",
+  description: "Experience fine dining with a touch of elegance and sophistication.",
 }
 
 export default function RootLayout({
