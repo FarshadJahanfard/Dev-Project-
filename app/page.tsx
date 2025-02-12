@@ -1,3 +1,4 @@
+'use client'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -19,17 +20,21 @@ export default function Home() {
       <header className="absolute top-0 left-0 right-0 z-50">
         <div className="container flex h-20 items-center justify-between px-4">
           <div className="flex items-center gap-6">
-            <Link href="/" className="text-2xl font-playfair font-bold">
+            <Link href="/" className="text-3xl md:text-4xl font-playfair font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
               ZenFlow
             </Link>
           </div>
           <div className="flex items-center gap-4">
             <Link href="/admin">
-              <Button variant="ghost" size="sm" className="h-8">
+                <Button variant="ghost" size="sm" className="h-8 text-white">
                 Admin Login
-              </Button>
+                </Button>
             </Link>
-            <Button size="sm" className="h-8 bg-secondary hover:bg-secondary/90 text-primary">
+            <Button
+              size="sm"
+              className="h-8 bg-secondary hover:bg-secondary/90 text-primary"
+              onClick={() => document.getElementById("reservation-form")?.scrollIntoView({ behavior: "smooth" })}
+            >
               Book Now
             </Button>
           </div>
@@ -38,8 +43,8 @@ export default function Home() {
 
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <Image
-            src="/placeholder.svg?height=1080&width=1920"
+          <Image  
+            src="/Capri-Newmillerdam-interior.jpg"
             alt="Restaurant ambiance"
             fill
             className="object-cover brightness-50"
@@ -227,43 +232,7 @@ export default function Home() {
   )
 }
 
-function Label({ children, ...props }: { children: React.ReactNode } & React.ComponentProps<"label">) {
-  return (
-    <label
-      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-      {...props}
-    >
-      {children}
-    </label>
-  )
-}
 
-function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
-  return (
-    <div className="space-y-3">
-      <textarea
-        className={`flex min-h-[80px] w-full rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
-        {...props}
-      />
-      <div className="rounded-lg bg-secondary/10 p-4 text-sm">
-        <p className="font-medium text-primary mb-1">Planning a larger gathering?</p>
-        <p className="text-muted-foreground">For parties of 7 or more, please contact us directly:</p>
-        <div className="mt-2 space-y-1">
-          <p>
-            <span className="text-muted-foreground">Phone: </span>
-            <a href="tel:+15551234567" className="text-secondary hover:underline">
-              +1 (555) 123-4567
-            </a>
-          </p>
-          <p>
-            <span className="text-muted-foreground">Email: </span>
-            <a href="mailto:reservations@zenflow.com" className="text-secondary hover:underline">
-              reservations@zenflow.com
-            </a>
-          </p>
-        </div>
-      </div>
-    </div>
-  )
-}
+
+
 
