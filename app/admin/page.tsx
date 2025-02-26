@@ -3,7 +3,6 @@ import { Overview } from "@/components/overview"
 import { RecentBookings } from "@/components/recent-bookings"
 import { CalendarDays, Users, UtensilsCrossed } from "lucide-react"
 
-export default function AdminDashboard() {
   return (
     <div className="space-y-6">
       <div>
