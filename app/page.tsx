@@ -81,7 +81,6 @@ export default function Home() {
                 <MapPin className="w-10 h-10 p-2 text-primary bg-secondary/20 rounded-lg mb-4" />
                 <CardTitle className="font-playfair">Location</CardTitle>
                 <CardDescription>Newmillerdam Branch, 648 Barnsley Rd, Wakefield</CardDescription>
-                <CardDescription>Mon-Sun: 10:30 AM - 10:00 PM</CardDescription>
               </CardHeader>
             </Card>
             <Card className="bg-card">
