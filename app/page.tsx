@@ -73,21 +73,22 @@ export default function Home() {
               <CardHeader>
                 <Clock className="w-10 h-10 p-2 text-primary bg-secondary/20 rounded-lg mb-4" />
                 <CardTitle className="font-playfair">Opening Hours</CardTitle>
-                <CardDescription>Mon-Sun: 5:00 PM - 11:00 PM</CardDescription>
+                <CardDescription>Mon-Sun: 10:30 PM - 10:00 PM</CardDescription>
               </CardHeader>
             </Card>
             <Card className="bg-card">
               <CardHeader>
                 <MapPin className="w-10 h-10 p-2 text-primary bg-secondary/20 rounded-lg mb-4" />
                 <CardTitle className="font-playfair">Location</CardTitle>
-                <CardDescription>123 Gourmet Street, Culinary District</CardDescription>
+                <CardDescription>Newmillerdam Branch, 648 Barnsley Rd, Wakefield</CardDescription>
+                <CardDescription>Mon-Sun: 10:30 AM - 10:00 PM</CardDescription>
               </CardHeader>
             </Card>
             <Card className="bg-card">
               <CardHeader>
                 <Phone className="w-10 h-10 p-2 text-primary bg-secondary/20 rounded-lg mb-4" />
                 <CardTitle className="font-playfair">Contact</CardTitle>
-                <CardDescription>+1 (555) 123-4567</CardDescription>
+                <CardDescription>+44 1924 465000</CardDescription>
               </CardHeader>
             </Card>
           </div>
@@ -177,7 +178,7 @@ export default function Home() {
                     Special Requests
                   </Label>
                   <p className="text-sm text-muted-foreground mb-2">
-                    Let us know if you have any dietary requirements or special preferences
+                    Let us know if you have any dietary requirements or special preferences.
                   </p>
                   <Textarea
                     id="notes"
