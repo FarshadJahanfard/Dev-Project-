@@ -98,7 +98,7 @@ const mockBookings = [
     guests: 4,
     notes: "Birthday celebration",
     status: "confirmed",
-    table: "T6",
+    table: "T1",
   },
   {
     id: "7",
@@ -109,7 +109,7 @@ const mockBookings = [
     guests: 2,
     notes: "",
     status: "confirmed",
-    table: "T7",
+    table: "T1",
   },
   {
     id: "8",
@@ -876,7 +876,7 @@ export default function AdminPage() {
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="restaurant-name">Restaurant Name</Label>
-                    <Input id="restaurant-name" defaultValue="ZenFlow" />
+                    <Input id="restaurant-name" defaultValue="Capri at the dam" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="opening-time">Opening Time</Label>
