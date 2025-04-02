@@ -97,103 +97,140 @@ export default function Home() {
       <section className="py-20" id="reservation-form">
         <div className="container px-4">
           <div className="max-w-2xl mx-auto">
-            <Card className="border-secondary/20">
-              <CardHeader className="text-center">
-                <CardTitle className="font-playfair text-3xl">Make a Reservation</CardTitle>
-                <CardDescription>Book your table for an unforgettable dining experience</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Name</Label>
-                    <Input id="name" placeholder="Enter your name" className="border-secondary/20" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input id="email" placeholder="Enter your email" type="email" className="border-secondary/20" />
-                  </div>
-                </div>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="date">Date</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          id="date"
-                          variant="outline"
-                          className="w-full justify-start text-left font-normal border-secondary/20"
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {date ? format(date, "PPP") : "Pick a date"}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar mode="single" selected={date} onSelect={setDate} initialFocus />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-                  <div className="space-y-2.5">
-                    <Label htmlFor="time" className="text-base font-medium">
-                      Time
-                    </Label>
-                    <Select>
-                      <SelectTrigger className="border-secondary/20 h-11">
-                        <SelectValue placeholder="Select time" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="10:30">10:30 AM</SelectItem>
-                        <SelectItem value="11:30">11:30 AM</SelectItem>
-                        <SelectItem value="12:30">12:30 PM</SelectItem>
-                        <SelectItem value="13:30">1:30 PM</SelectItem>
-                        <SelectItem value="14:30">2:30 PM</SelectItem>
-                        <SelectItem value="15:30">3:30 PM</SelectItem>
-                        <SelectItem value="16:30">4:30 PM</SelectItem>
-                        <SelectItem value="17:30">5:30 PM</SelectItem>
-                        <SelectItem value="18:30">6:30 PM</SelectItem>
-                        <SelectItem value="19:30">7:30 PM</SelectItem>
-                        <SelectItem value="20:30">8:30 PM</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="guests">Number of Guests</Label>
-                  <Select>
-                    <SelectTrigger className="border-secondary/20">
-                      <SelectValue placeholder="Select number of guests" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1">1 Guest</SelectItem>
-                      <SelectItem value="2">2 Guests</SelectItem>
-                      <SelectItem value="3">3 Guests</SelectItem>
-                      <SelectItem value="4">4 Guests</SelectItem>
-                      <SelectItem value="5">5 Guests</SelectItem>
-                      <SelectItem value="6">6 Guests</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="notes" className="text-base">
-                    Special Requests
-                  </Label>
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Let us know if you have any dietary requirements or special preferences.
-                  </p>
-                  <Textarea
-                    id="notes"
-                    placeholder="Any special requests or dietary requirements?"
-                    className="min-h-[120px] resize-none border-secondary/20"
-                  />
-                </div>
-              </CardContent>
-              <CardFooter className="flex flex-col gap-4">
-                <Button className="w-full bg-secondary hover:bg-secondary/90 text-primary">Request Reservation</Button>
-                <p className="text-center text-sm text-red-500">
-                  Note: All reservations require confirmation from our staff. You will receive an email once your
-                  booking is confirmed.
-                </p>
-              </CardFooter>
-            </Card>
+        <Card className="border-secondary/20">
+          <CardHeader className="text-center">
+            <CardTitle className="font-playfair text-3xl">Make a Reservation</CardTitle>
+            <CardDescription>Book your table for an unforgettable dining experience</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <form
+          onSubmit={async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.currentTarget);
+            const data = {
+              name: formData.get("name"),
+              email: formData.get("email"),
+              date: date,
+              time: formData.get("time"),
+              guests: formData.get("guests"),
+              notes: formData.get("notes"),
+            };
+
+            try {
+              const response = await fetch("/api/reserve", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+              });
+
+              if (!response.ok) {
+            throw new Error("Failed to submit reservation");
+              }
+
+              alert("Reservation request submitted successfully!");
+            } catch (error) {
+              console.error(error);
+              alert("An error occurred while submitting your reservation.");
+            }
+          }}
+            >
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <Input id="name" name="name" placeholder="Enter your name" className="border-secondary/20" required />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" name="email" placeholder="Enter your email" type="email" className="border-secondary/20" required />
+            </div>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="date">Date</Label>
+              <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                id="date"
+                variant="outline"
+                className="w-full justify-start text-left font-normal border-secondary/20"
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {date ? format(date, "PPP") : "Pick a date"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar mode="single" selected={date} onSelect={setDate} initialFocus />
+            </PopoverContent>
+              </Popover>
+            </div>
+            <div className="space-y-2.5">
+              <Label htmlFor="time" className="text-base font-medium">
+            Time
+              </Label>
+              <Select name="time" required>
+            <SelectTrigger className="border-secondary/20 h-11">
+              <SelectValue placeholder="Select time" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="10:30">10:30 AM</SelectItem>
+              <SelectItem value="11:30">11:30 AM</SelectItem>
+              <SelectItem value="12:30">12:30 PM</SelectItem>
+              <SelectItem value="13:30">1:30 PM</SelectItem>
+              <SelectItem value="14:30">2:30 PM</SelectItem>
+              <SelectItem value="15:30">3:30 PM</SelectItem>
+              <SelectItem value="16:30">4:30 PM</SelectItem>
+              <SelectItem value="17:30">5:30 PM</SelectItem>
+              <SelectItem value="18:30">6:30 PM</SelectItem>
+              <SelectItem value="19:30">7:30 PM</SelectItem>
+              <SelectItem value="20:30">8:30 PM</SelectItem>
+            </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="guests">Number of Guests</Label>
+            <Select name="guests" required>
+              <SelectTrigger className="border-secondary/20">
+            <SelectValue placeholder="Select number of guests" />
+              </SelectTrigger>
+              <SelectContent>
+            <SelectItem value="1">1 Guest</SelectItem>
+            <SelectItem value="2">2 Guests</SelectItem>
+            <SelectItem value="3">3 Guests</SelectItem>
+            <SelectItem value="4">4 Guests</SelectItem>
+            <SelectItem value="5">5 Guests</SelectItem>
+            <SelectItem value="6">6 Guests</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="notes" className="text-base">
+              Special Requests
+            </Label>
+            <p className="text-sm text-muted-foreground mb-2">
+              Let us know if you have any dietary requirements or special preferences.
+            </p>
+            <Textarea
+              id="notes"
+              name="notes"
+              placeholder="Any special requests or dietary requirements?"
+              className="min-h-[120px] resize-none border-secondary/20"
+            />
+          </div>
+          <CardFooter className="flex flex-col gap-4">
+            <Button type="submit" className="w-full bg-secondary hover:bg-secondary/90 text-primary">
+              Request Reservation
+            </Button>
+            <p className="text-center text-sm text-red-500">
+              Note: All reservations require confirmation from our staff. You will receive an email once your
+              booking is confirmed.
+            </p>
+          </CardFooter>
+            </form>
+          </CardContent>
+        </Card>
           </div>
         </div>
       </section>
