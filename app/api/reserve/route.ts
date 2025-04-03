@@ -18,8 +18,8 @@ export async function POST(request: Request) {
     console.log('Parsed reservation data:', { name, email, date, time, guests, notes });
 
     try {
-        const connection = await mysql.createConnection(connectionParams);
-        const [customer_records] = await connection.query<any>('SELECT customer_id, name, email FROM CUSTOMERS WHERE name=? AND email=?', [name, email]);
+        const connection = await mysql.createConnection(connectionParams); // Create a connection to the database
+        const [customer_records] = await connection.query<any>('SELECT customer_id, name, email FROM CUSTOMERS WHERE name=? AND email=?', [name, email]); // Check if the customer already exists
         let customerID = undefined;
 
         if (customer_records.length > 0) {
@@ -32,11 +32,17 @@ export async function POST(request: Request) {
             // If no customer record exists, insert a new record
             const [new_record] = await connection.query<any>('INSERT INTO CUSTOMERS (name, email) VALUES (?, ?)', [name, email]);
             customerID = new_record.insertId; // Get the ID of the newly inserted record
-            console.log('Inserted new customer record:', customerID);
+            console.log('Inserted new customer record:', customerID); 
         }   
 
         // check Tables ID where size is >= guests
         let [possibleTables] = await connection.query<any>('SELECT table_id FROM TABLES WHERE capacity >= ? ORDER BY capacity ASC', [guests]);
+        // guests is a required field and must be a number
+        if (!guests || typeof guests !== 'number' || guests <= 0) {
+            return NextResponse.json({ 
+                error: "`guests` is a required field and must be selected."
+            }, { status: 400 });
+        }
 
         // Check if there are any tables +- 2hrs from the time we want (we need 2hrs to eat).
         possibleTables = possibleTables.map((table: any) => table.table_id);
@@ -77,3 +83,30 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Database connection error' }, { status: 500 });
     }
 }
+
+// new api for fetching reservations to show in admin panel
+export async function GET(request: NextRequest) {
+    const connectionParams = {
+        host: 'localhost',
+        port: 3306,
+        user: 'root',
+        password: '',
+        database: 'ZenFlow'
+    };
+
+    try {
+        const connection = await mysql.createConnection(connectionParams); // Create a connection to the database
+        const [reservations] = await connection.query<any>('SELECT * FROM BOOKINGS'); // Fetch all reservations
+        connection.end();
+
+        return NextResponse.json({ reservations }, { status: 200 });
+    } catch (error) {
+        console.error('Database connection error:', error);
+        return NextResponse.json({ error: 'Database connection error' }, { status: 500 });
+    }
+}
+
+
+
+
+

@@ -18,8 +18,8 @@ import {
   ChevronRight,
   LayoutDashboard,
   BarChart3,
-  Clock,
   Utensils,
+  Plus,
   Settings,
 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -144,7 +144,7 @@ const mockBookings = [
   },
 ]
 
-type ViewType = "dashboard" | "bookings" | "timeSlots" | "popularTimes" | "tableUsage" | "settings"
+type ViewType = "dashboard" | "bookings" | "Add Table" | "popularTimes" | "tableUsage" | "settings" 
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -263,32 +263,8 @@ export default function AdminPage() {
     setSelectedDate((prev) => addDays(prev, 1))
   }
 
-  // Generate time slots for the selected date
-  const generateTimeSlots = () => {
-    const slots = []
-    const startHour = 10 // 10 AM
-    const endHour = 22 // 10 PM
 
-    for (let hour = startHour; hour < endHour; hour++) {
-      for (let minute = 0; minute < 60; minute += 15) {
-        const time = `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`
-        const bookingsInSlot = bookings.filter((booking) => {
-          if (!isSameDay(parseISO(booking.date), selectedDate)) return false
-
-          const [bookingHour, bookingMinute] = booking.time.split(":").map(Number)
-          return bookingHour === hour && bookingMinute >= minute && bookingMinute < minute + 15
-        })
-
-        slots.push({
-          time,
-          count: bookingsInSlot.length,
-          guests: bookingsInSlot.reduce((sum, booking) => sum + booking.guests, 0),
-        })
-      }
-    }
-
-    return slots
-  }
+  
 
   // Generate data for popular times chart
   const generatePopularTimesData = () => {
@@ -427,14 +403,14 @@ export default function AdminPage() {
 
             <h2 className="text-lg font-semibold mt-6 mb-4">Analytics</h2>
             <nav className="space-y-2">
-              <Button
-                variant={currentView === "timeSlots" ? "secondary" : "ghost"}
-                className="w-full justify-start"
-                onClick={() => setCurrentView("timeSlots")}
-              >
-                <Clock className="mr-2 h-4 w-4" />
-                Time Slots
-              </Button>
+                  <Button
+                  variant={currentView === "Add Table" ? "secondary" : "ghost"}
+                  className="w-full justify-start"
+                  onClick={() => setCurrentView("Add Table")}
+                  >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Table
+                  </Button>
               <Button
                 variant={currentView === "popularTimes" ? "secondary" : "ghost"}
                 className="w-full justify-start"
@@ -614,82 +590,77 @@ export default function AdminPage() {
             </div>
           )}
 
-          {currentView === "timeSlots" && (
-            <div className="space-y-6">
+            {currentView === "Add Table" && (
+              <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="text-3xl font-playfair">Time Slots Analysis</h1>
-                  <p className="text-muted-foreground">Customer distribution by 15-minute intervals</p>
-                </div>
-                <div className="flex items-center gap-4">
-                  <Button variant="outline" size="icon" onClick={handlePreviousDay}>
-                    <ChevronLeft className="h-4 w-4" />
-                    <span className="sr-only">Previous day</span>
-                  </Button>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" className="min-w-[240px] justify-start text-left font-normal">
-                        <Calendar className="mr-2 h-4 w-4" />
-                        {format(selectedDate, "EEEE, MMMM d, yyyy")}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <CalendarComponent
-                        mode="single"
-                        selected={selectedDate}
-                        onSelect={(date) => date && setSelectedDate(date)}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <Button variant="outline" size="icon" onClick={handleNextDay}>
-                    <ChevronRight className="h-4 w-4" />
-                    <span className="sr-only">Next day</span>
-                  </Button>
+                <h1 className="text-3xl font-playfair">Add Table</h1>
+                <p className="text-muted-foreground">Add new tables to the system</p>
                 </div>
               </div>
-
               <Card>
                 <CardHeader>
-                  <CardTitle>Bookings by 15-Minute Slots</CardTitle>
-                  <CardDescription>
-                    Visualize customer distribution throughout the day in 15-minute intervals
-                  </CardDescription>
+                <CardTitle>Add a New Table</CardTitle>
+                <CardDescription>Provide details for the new table</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="rounded-md border">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Time Slot</TableHead>
-                          <TableHead className="text-center">Bookings</TableHead>
-                          <TableHead className="text-center">Total Guests</TableHead>
-                          <TableHead>Visualization</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {generateTimeSlots().map((slot) => (
-                          <TableRow key={slot.time}>
-                            <TableCell className="font-medium">{slot.time}</TableCell>
-                            <TableCell className="text-center">{slot.count}</TableCell>
-                            <TableCell className="text-center">{slot.guests}</TableCell>
-                            <TableCell>
-                              <div className="w-full bg-muted rounded-full h-4">
-                                <div
-                                  className="bg-secondary h-4 rounded-full"
-                                  style={{ width: `${Math.min(100, slot.count * 20)}%` }}
-                                ></div>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+                <form
+                  onSubmit={(e) => {
+                  e.preventDefault()
+                  const formData = new FormData(e.target as HTMLFormElement)
+                  const tableNumber = formData.get("tableNumber") as string
+                  const capacity = formData.get("capacity") as string
+                  const location = formData.get("location") as string
+                  const isActive = formData.get("isActive") as string
+
+                  if (tableNumber.trim() && capacity.trim() && location.trim() && isActive.trim()) {
+                    toast({
+                    title: "Table Added",
+                    description: `Table "${tableNumber}" has been added successfully.`,
+                    })
+                  } else {
+                    toast({
+                    title: "Error",
+                    description: "All fields are required.",
+                    variant: "destructive",
+                    })
+                  }
+                  }}
+                >
+                  <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="tableNumber">Table Number</Label>
+                    <Input id="tableNumber" name="tableNumber" placeholder="Enter table number" required />
                   </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
+                  <div className="space-y-2">
+                    <Label htmlFor="capacity">Capacity</Label>
+                    <Input id="capacity" name="capacity" type="number" placeholder="Enter table capacity" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="location">Location</Label>
+                    <Input id="location" name="location" placeholder="Enter table location" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="isActive">Is Active</Label>
+                    <select id="isActive" name="isActive" className="w-full border rounded px-3 py-2" required>
+                    <option value="">Select</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                    </select>
+                  </div>
+                  </div>
+                  <CardFooter>
+                        <div className="mt-4">
+                          <Button type="submit" className="w-full bg-secondary hover:bg-secondary/90 text-primary">
+                            Add Table
+                          </Button>
+                        </div>
+                      </CardFooter>
+                    </form>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
 
           {currentView === "popularTimes" && (
             <div className="space-y-6">
@@ -886,7 +857,7 @@ export default function AdminPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="booking-interval">Booking Interval (minutes)</Label>
-                    <Input id="booking-interval" type="number" defaultValue="15" />
+                    <Input id="booking-interval" type="number" defaultValue="30" />
                   </div>
                 </CardContent>
                 <CardFooter>

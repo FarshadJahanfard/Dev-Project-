@@ -65,7 +65,6 @@ export default function Home() {
           </Button>
         </div>
       </section>
-
       <section className="py-20 bg-muted">
         <div className="container px-4">
           <div className="grid gap-8 md:grid-cols-3 max-w-5xl mx-auto">
@@ -117,7 +116,7 @@ export default function Home() {
             };
 
             try {
-              const response = await fetch("/api/reserve", {
+              const response = await fetch("/api/reservations", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -139,72 +138,77 @@ export default function Home() {
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="name">Name</Label>
-              <Input id="name" name="name" placeholder="Enter your name" className="border-secondary/20" required />
+              <Input id="name" name="name" placeholder="Enter your name" className="border-secondary/20" required aria-required="true" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" name="email" placeholder="Enter your email" type="email" className="border-secondary/20" required />
+              <Input id="email" name="email" placeholder="Enter your email" type="email" className="border-secondary/20" required aria-required="true" />
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="date">Date</Label>
               <Popover>
-            <PopoverTrigger asChild>
-              <Button
+              <PopoverTrigger asChild>
+                <Button
                 id="date"
                 variant="outline"
-                className="w-full justify-start text-left font-normal border-secondary/20"
-              >
+                className={`w-full justify-start text-left font-normal border-secondary/20 ${
+                  !date ? "border-red-500" : ""
+                }`}
+                >
                 <CalendarIcon className="mr-2 h-4 w-4" />
                 {date ? format(date, "PPP") : "Pick a date"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar mode="single" selected={date} onSelect={setDate} initialFocus />
-            </PopoverContent>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar mode="single" selected={date} onSelect={setDate} initialFocus />
+              </PopoverContent>
               </Popover>
+              {!date && (
+              <p className="text-sm text-red-500">Please select a date.</p>
+              )}
             </div>
             <div className="space-y-2.5">
               <Label htmlFor="time" className="text-base font-medium">
-            Time
+              Time
               </Label>
-              <Select name="time" required>
-            <SelectTrigger className="border-secondary/20 h-11">
-              <SelectValue placeholder="Select time" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="10:30">10:30 AM</SelectItem>
-              <SelectItem value="11:30">11:30 AM</SelectItem>
-              <SelectItem value="12:30">12:30 PM</SelectItem>
-              <SelectItem value="13:30">1:30 PM</SelectItem>
-              <SelectItem value="14:30">2:30 PM</SelectItem>
-              <SelectItem value="15:30">3:30 PM</SelectItem>
-              <SelectItem value="16:30">4:30 PM</SelectItem>
-              <SelectItem value="17:30">5:30 PM</SelectItem>
-              <SelectItem value="18:30">6:30 PM</SelectItem>
-              <SelectItem value="19:30">7:30 PM</SelectItem>
-              <SelectItem value="20:30">8:30 PM</SelectItem>
-            </SelectContent>
+              <Select name="time" required aria-required="true">
+              <SelectTrigger className="border-secondary/20 h-11">
+                <SelectValue placeholder="Select time" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10:30">10:30 AM</SelectItem>
+                <SelectItem value="11:30">11:30 AM</SelectItem>
+                <SelectItem value="12:30">12:30 PM</SelectItem>
+                <SelectItem value="13:30">1:30 PM</SelectItem>
+                <SelectItem value="14:30">2:30 PM</SelectItem>
+                <SelectItem value="15:30">3:30 PM</SelectItem>
+                <SelectItem value="16:30">4:30 PM</SelectItem>
+                <SelectItem value="17:30">5:30 PM</SelectItem>
+                <SelectItem value="18:30">6:30 PM</SelectItem>
+                <SelectItem value="19:30">7:30 PM</SelectItem>
+                <SelectItem value="20:30">8:30 PM</SelectItem>
+              </SelectContent>
               </Select>
             </div>
           </div>
-          <div className="space-y-2">
+            <div className="space-y-2">
             <Label htmlFor="guests">Number of Guests</Label>
             <Select name="guests" required>
-              <SelectTrigger className="border-secondary/20">
-            <SelectValue placeholder="Select number of guests" />
+              <SelectTrigger className="border-secondary/20" aria-required="true">
+              <SelectValue placeholder="Select number of guests" />
               </SelectTrigger>
               <SelectContent>
-            <SelectItem value="1">1 Guest</SelectItem>
-            <SelectItem value="2">2 Guests</SelectItem>
-            <SelectItem value="3">3 Guests</SelectItem>
-            <SelectItem value="4">4 Guests</SelectItem>
-            <SelectItem value="5">5 Guests</SelectItem>
-            <SelectItem value="6">6 Guests</SelectItem>
+              <SelectItem value="1">1 Guest</SelectItem>
+              <SelectItem value="2">2 Guests</SelectItem>
+              <SelectItem value="3">3 Guests</SelectItem>
+              <SelectItem value="4">4 Guests</SelectItem>
+              <SelectItem value="5">5 Guests</SelectItem>
+              <SelectItem value="6">6 Guests</SelectItem>
               </SelectContent>
             </Select>
-          </div>
+            </div>
           <div className="space-y-2">
             <Label htmlFor="notes" className="text-base">
               Special Requests
