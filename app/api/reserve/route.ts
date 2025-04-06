@@ -1,7 +1,5 @@
 import { NextResponse, NextRequest } from "next/server";
 import mysql from 'mysql2/promise';
-import { Select } from "@radix-ui/react-select";
-import { CodeSquare } from "lucide-react";
 
 export async function POST(request: Request) {
     const connectionParams = {
