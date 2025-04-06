@@ -105,18 +105,21 @@ export default function Home() {
             <form
           onSubmit={async (e) => {
             e.preventDefault();
-            const formData = new FormData(e.currentTarget);
-            const data = {
-              name: formData.get("name"),
-              email: formData.get("email"),
-              date: date,
-              time: formData.get("time"),
-              guests: formData.get("guests"),
-              notes: formData.get("notes"),
-            };
+  const formData = new FormData(e.currentTarget);
+  const formattedDate = date?.toISOString().split('T')[0];
+  const time = formData.get("time"); // assuming you have a "time" input field like 14:30
+  const formattedTime = `${formattedDate} ${time}:00`; // "YYYY-MM-DD HH:mm:ss"
+  const data = {
+    name: formData.get("name"),
+    email: formData.get("email"),
+    date: formattedDate, // keep it simple for the separate field
+    time: formattedTime, // now it’s full datetime format
+    guests: Number(formData.get("guests")),
+    notes: formData.get("notes"),
+  };
 
             try {
-              const response = await fetch("/api/reservations", {
+              const response = await fetch("/api/reserve", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
