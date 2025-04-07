@@ -310,52 +310,52 @@ export default function Dashboard({mockBookings}: {mockBookings: any[]}) {
       .sort((a, b) => a.table.localeCompare(b.table))
   }
 
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-muted">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <Link href="/" className="text-sm text-muted-foreground hover:text-primary flex items-center gap-1">
-                <ArrowLeft className="h-4 w-4" /> Back to Website
-              </Link>
-            </div>
-            <CardTitle className="text-2xl font-playfair text-center mt-4">ZenFlow Admin</CardTitle>
-            <CardDescription className="text-center">Login to manage reservations</CardDescription>
-          </CardHeader>
-          <form onSubmit={handleLogin}>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
-                <Input id="username" value={username} onChange={(e) => setUsername(e.target.value)} required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button type="submit" className="w-full bg-secondary hover:bg-secondary/90 text-primary">
-                Login
-              </Button>
-            </CardFooter>
-          </form>
-          <div className="px-6 pb-6">
-            <p className="text-xs text-center text-muted-foreground mt-4">
-              For demo purposes, use username: <span className="font-semibold">admin</span> and password:{" "}
-              <span className="font-semibold">password</span>
-            </p>
-          </div>
-        </Card>
-      </div>
-    )
-  }
+  // if (!isAuthenticated) {
+  //   return (
+  //     <div className="min-h-screen flex items-center justify-center bg-muted">
+  //       <Card className="w-full max-w-md">
+  //         <CardHeader>
+  //           <div className="flex items-center justify-between">
+  //             <Link href="/" className="text-sm text-muted-foreground hover:text-primary flex items-center gap-1">
+  //               <ArrowLeft className="h-4 w-4" /> Back to Website
+  //             </Link>
+  //           </div>
+  //           <CardTitle className="text-2xl font-playfair text-center mt-4">ZenFlow Admin</CardTitle>
+  //           <CardDescription className="text-center">Login to manage reservations</CardDescription>
+  //         </CardHeader>
+  //         <form onSubmit={handleLogin}>
+  //           <CardContent className="space-y-4">
+  //             <div className="space-y-2">
+  //               <Label htmlFor="username">Username</Label>
+  //               <Input id="username" value={username} onChange={(e) => setUsername(e.target.value)} required />
+  //             </div>
+  //             <div className="space-y-2">
+  //               <Label htmlFor="password">Password</Label>
+  //               <Input
+  //                 id="password"
+  //                 type="password"
+  //                 value={password}
+  //                 onChange={(e) => setPassword(e.target.value)}
+  //                 required
+  //               />
+  //             </div>
+  //           </CardContent>
+  //           <CardFooter>
+  //             <Button type="submit" className="w-full bg-secondary hover:bg-secondary/90 text-primary">
+  //               Login
+  //             </Button>
+  //           </CardFooter>
+  //         </form>
+  //         <div className="px-6 pb-6">
+  //           <p className="text-xs text-center text-muted-foreground mt-4">
+  //             For demo purposes, use username: <span className="font-semibold">admin</span> and password:{" "}
+  //             <span className="font-semibold">password</span>
+  //           </p>
+  //         </div>
+  //       </Card>
+  //     </div>
+  //   )
+  // }
 
   return (
     <div className="min-h-screen bg-muted">

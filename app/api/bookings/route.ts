@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
         const connection = await mysql.createConnection(connectionParams);
 
         const [rows] = await connection.query<any>(`
-            SELECT 
+             SELECT 
                 B.booking_id AS id,
                 C.name,
                 C.email,
@@ -27,7 +27,8 @@ export async function GET(request: NextRequest) {
             FROM BOOKINGS B
             JOIN CUSTOMERS C ON B.customer_id = C.customer_id
             JOIN TABLES T ON B.table_id = T.table_id
-            ORDER BY B.booking_date DESC, B.booking_time DESC
+            WHERE DATE(B.booking_date) = CURDATE()
+            ORDER BY B.booking_time DESC
         `);
 
         connection.end();

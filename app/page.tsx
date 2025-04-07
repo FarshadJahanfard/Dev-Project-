@@ -106,7 +106,10 @@ export default function Home() {
           onSubmit={async (e) => {
             e.preventDefault();
   const formData = new FormData(e.currentTarget);
+  date?.setHours(1);
   const formattedDate = date?.toISOString().split('T')[0];
+  console.log("date", date);
+  console.log("formattedDate", formattedDate);
   const time = formData.get("time"); // assuming you have a "time" input field like 14:30
   const formattedTime = `${formattedDate} ${time}:00`; // "YYYY-MM-DD HH:mm:ss"
   const data = {
