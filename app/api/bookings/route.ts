@@ -33,6 +33,8 @@ export async function GET(request: NextRequest) {
 
         connection.end();
 
+        console.log('Fetched reservations:', rows);
+
         return NextResponse.json({ reservations: rows }, { status: 200 });
     } catch (error) {
         console.error('Database connection error:', error);

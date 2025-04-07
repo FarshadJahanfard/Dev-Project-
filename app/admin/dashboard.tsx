@@ -8,6 +8,13 @@ import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Calendar as CalendarComponent } from "@/components/ui/calendar"
+import { format, addDays, subDays, isSameDay, parseISO } from "date-fns"
+import Link from "next/link"
+import { updateBookingStatus } from "../action"
+import { useToast } from "@/components/ui/use-toast"
 import {
   Check,
   X,
@@ -22,127 +29,123 @@ import {
   Plus,
   Settings,
 } from "lucide-react"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Calendar as CalendarComponent } from "@/components/ui/calendar"
-import { format, addDays, subDays, isSameDay, parseISO } from "date-fns"
-import Link from "next/link"
-import { updateBookingStatus } from "../actions"
-import { useToast } from "@/components/ui/use-toast"
 
-// Mock data for bookings
-const test = [
-  {
-    id: "1",
-    name: "John Smith",
-    email: "john@example.com",
-    date: "2025-02-26",
-    time: "19:30",
-    guests: 4,
-    notes: "Window seat preferred",
-    status: "pending",
-    table: "T1",
-  },
-  {
-    id: "2",
-    name: "Emma Johnson",
-    email: "emma@example.com",
-    date: "2025-02-27",
-    time: "20:30",
-    guests: 2,
-    notes: "Anniversary celebration",
-    status: "confirmed",
-    table: "T2",
-  },
-  {
-    id: "3",
-    name: "Michael Brown",
-    email: "michael@example.com",
-    date: "2025-02-27",
-    time: "18:30",
-    guests: 6,
-    notes: "Gluten-free options needed for two guests",
-    status: "pending",
-    table: "T3",
-  },
-  {
-    id: "4",
-    name: "Sarah Wilson",
-    email: "sarah@example.com",
-    date: "2025-02-28",
-    time: "12:30",
-    guests: 3,
-    notes: "",
-    status: "rejected",
-    table: "T4",
-  },
-  {
-    id: "5",
-    name: "David Lee",
-    email: "david@example.com",
-    date: "2025-02-28",
-    time: "13:30",
-    guests: 2,
-    notes: "Vegetarian options needed",
-    status: "pending",
-    table: "T5",
-  },
-  {
-    id: "6",
-    name: "Lisa Chen",
-    email: "lisa@example.com",
-    date: "2025-02-26",
-    time: "18:00",
-    guests: 4,
-    notes: "Birthday celebration",
-    status: "confirmed",
-    table: "T1",
-  },
-  {
-    id: "7",
-    name: "Robert Taylor",
-    email: "robert@example.com",
-    date: "2025-02-26",
-    time: "19:00",
-    guests: 2,
-    notes: "",
-    status: "confirmed",
-    table: "T1",
-  },
-  {
-    id: "8",
-    name: "Jennifer Adams",
-    email: "jennifer@example.com",
-    date: "2025-02-26",
-    time: "20:00",
-    guests: 5,
-    notes: "Allergy to nuts",
-    status: "confirmed",
-    table: "T8",
-  },
-  {
-    id: "9",
-    name: "Thomas Wilson",
-    email: "thomas@example.com",
-    date: "2025-02-26",
-    time: "18:30",
-    guests: 3,
-    notes: "",
-    status: "confirmed",
-    table: "T9",
-  },
-  {
-    id: "10",
-    name: "Maria Garcia",
-    email: "maria@example.com",
-    date: "2025-02-26",
-    time: "19:15",
-    guests: 2,
-    notes: "Anniversary",
-    status: "confirmed",
-    table: "T10",
-  },
-]
+   
+
+
+// // Mock data for bookings
+// const test = [
+//   {
+//     id: "1",
+//     name: "John Smith",
+//     email: "john@example.com",
+//     date: "2025-02-26",
+//     time: "19:30",
+//     guests: 4,
+//     notes: "Window seat preferred",
+//     status: "PENDING",
+//     table: "T1",
+//   },
+//   {
+//     id: "2",
+//     name: "Emma Johnson",
+//     email: "emma@example.com",
+//     date: "2025-02-27",
+//     time: "20:30",
+//     guests: 2,
+//     notes: "Anniversary celebration",
+//     status: "CONFIRMED",
+//     table: "T2",
+//   },
+//   {
+//     id: "3",
+//     name: "Michael Brown",
+//     email: "michael@example.com",
+//     date: "2025-02-27",
+//     time: "18:30",
+//     guests: 6,
+//     notes: "Gluten-free options needed for two guests",
+//     status: "PENDING",
+//     table: "T3",
+//   },
+//   {
+//     id: "4",
+//     name: "Sarah Wilson",
+//     email: "sarah@example.com",
+//     date: "2025-02-28",
+//     time: "12:30",
+//     guests: 3,
+//     notes: "",
+//     status: "REJECTED",
+//     table: "T4",
+//   },
+//   {
+//     id: "5",
+//     name: "David Lee",
+//     email: "david@example.com",
+//     date: "2025-02-28",
+//     time: "13:30",
+//     guests: 2,
+//     notes: "Vegetarian options needed",
+//     status: "PENDING",
+//     table: "T5",
+//   },
+//   {
+//     id: "6",
+//     name: "Lisa Chen",
+//     email: "lisa@example.com",
+//     date: "2025-02-26",
+//     time: "18:00",
+//     guests: 4,
+//     notes: "Birthday celebration",
+//     status: "CONFIRMED",
+//     table: "T1",
+//   },
+//   {
+//     id: "7",
+//     name: "Robert Taylor",
+//     email: "robert@example.com",
+//     date: "2025-02-26",
+//     time: "19:00",
+//     guests: 2,
+//     notes: "",
+//     status: "CONFIRMED",
+//     table: "T1",
+//   },
+//   {
+//     id: "8",
+//     name: "Jennifer Adams",
+//     email: "jennifer@example.com",
+//     date: "2025-02-26",
+//     time: "20:00",
+//     guests: 5,
+//     notes: "Allergy to nuts",
+//     status: "CONFIRMED",
+//     table: "T8",
+//   },
+//   {
+//     id: "9",
+//     name: "Thomas Wilson",
+//     email: "thomas@example.com",
+//     date: "2025-02-26",
+//     time: "18:30",
+//     guests: 3,
+//     notes: "",
+//     status: "CONFIRMED",
+//     table: "T9",
+//   },
+//   {
+//     id: "10",
+//     name: "Maria Garcia",
+//     email: "maria@example.com",
+//     date: "2025-02-26",
+//     time: "19:15",
+//     guests: 2,
+//     notes: "Anniversary",
+//     status: "CONFIRMED",
+//     table: "T10",
+//   },
+// ]
 
 type ViewType = "dashboard" | "bookings" | "Add Table" | "popularTimes" | "tableUsage" | "settings" 
 
@@ -185,8 +188,9 @@ export default function Dashboard({mockBookings}: {mockBookings: any[]}) {
     }
   }
 
-  const handleStatusChange = async (bookingId: string, newStatus: "confirmed" | "rejected" | "pending") => {
+  const handleStatusChange = async (bookingId: string, newStatus: "CONFIRMED" | "REJECTED" | "PENDING") => {
     try {
+      console.log("Handle status change for booking:", bookingId, "to status:", newStatus)
       const result = await updateBookingStatus(bookingId, newStatus)
 
       if (result.success) {
@@ -241,11 +245,11 @@ export default function Dashboard({mockBookings}: {mockBookings: any[]}) {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "confirmed":
+      case "CONFIRMED":
         return <Badge className="bg-green-500 hover:bg-green-600">Confirmed</Badge>
-      case "rejected":
+      case "REJECTED":
         return <Badge variant="destructive">Rejected</Badge>
-      case "pending":
+      case "PENDING":
       default:
         return (
           <Badge variant="outline" className="text-yellow-600 border-yellow-600">
@@ -291,9 +295,9 @@ export default function Dashboard({mockBookings}: {mockBookings: any[]}) {
     bookings.forEach((booking) => {
       if (!tables[booking.table]) {
         tables[booking.table] = {
-          confirmed: 0,
-          pending: 0,
-          rejected: 0,
+          CONFIRMED: 0,
+          PENDING: 0,
+          REJECTED: 0,
           total: 0,
         }
       }
@@ -454,9 +458,9 @@ export default function Dashboard({mockBookings}: {mockBookings: any[]}) {
               <Tabs defaultValue="all" className="w-full">
                 <TabsList>
                   <TabsTrigger value="all">All</TabsTrigger>
-                  <TabsTrigger value="pending">Pending</TabsTrigger>
-                  <TabsTrigger value="confirmed">Confirmed</TabsTrigger>
-                  <TabsTrigger value="rejected">Rejected</TabsTrigger>
+                  <TabsTrigger value="PENDING">Pending</TabsTrigger>
+                  <TabsTrigger value="CONFIRMED">Confirmed</TabsTrigger>
+                  <TabsTrigger value="REJECTED">Rejected</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="all">
@@ -469,9 +473,9 @@ export default function Dashboard({mockBookings}: {mockBookings: any[]}) {
                   />
                 </TabsContent>
 
-                <TabsContent value="pending">
+                <TabsContent value="PENDING">
                   <BookingsTable
-                    bookings={bookings.filter((booking) => booking.status === "pending")}
+                    bookings={bookings.filter((booking) => booking.status === "PENDING")}
                     onStatusChange={handleStatusChange}
                     formatDate={formatDate}
                     getStatusBadge={getStatusBadge}
@@ -479,9 +483,9 @@ export default function Dashboard({mockBookings}: {mockBookings: any[]}) {
                   />
                 </TabsContent>
 
-                <TabsContent value="confirmed">
+                <TabsContent value="CONFIRMED">
                   <BookingsTable
-                    bookings={bookings.filter((booking) => booking.status === "confirmed")}
+                    bookings={bookings.filter((booking) => booking.status === "CONFIRMED")}
                     onStatusChange={handleStatusChange}
                     formatDate={formatDate}
                     getStatusBadge={getStatusBadge}
@@ -489,9 +493,9 @@ export default function Dashboard({mockBookings}: {mockBookings: any[]}) {
                   />
                 </TabsContent>
 
-                <TabsContent value="rejected">
+                <TabsContent value="REJECTED">
                   <BookingsTable
-                    bookings={bookings.filter((booking) => booking.status === "rejected")}
+                    bookings={bookings.filter((booking) => booking.status === "REJECTED")}
                     onStatusChange={handleStatusChange}
                     formatDate={formatDate}
                     getStatusBadge={getStatusBadge}
@@ -540,9 +544,9 @@ export default function Dashboard({mockBookings}: {mockBookings: any[]}) {
               <Tabs defaultValue="all" className="w-full">
                 <TabsList>
                   <TabsTrigger value="all">All</TabsTrigger>
-                  <TabsTrigger value="pending">Pending</TabsTrigger>
-                  <TabsTrigger value="confirmed">Confirmed</TabsTrigger>
-                  <TabsTrigger value="rejected">Rejected</TabsTrigger>
+                  <TabsTrigger value="PENDING">Pending</TabsTrigger>
+                  <TabsTrigger value="CONFIRMED">Confirmed</TabsTrigger>
+                  <TabsTrigger value="REJECTED">Rejected</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="all">
@@ -554,10 +558,10 @@ export default function Dashboard({mockBookings}: {mockBookings: any[]}) {
                   />
                 </TabsContent>
 
-                <TabsContent value="pending">
+                <TabsContent value="PENDING">
                   <BookingsTable
                     bookings={bookings.filter(
-                      (booking) => booking.status === "pending" && isSameDay(new Date(booking.date), selectedDate),
+                      (booking) => booking.status === "PENDING" && isSameDay(new Date(booking.date), selectedDate),
                     )}
                     onStatusChange={handleStatusChange}
                     formatDate={formatDate}
@@ -565,10 +569,10 @@ export default function Dashboard({mockBookings}: {mockBookings: any[]}) {
                   />
                 </TabsContent>
 
-                <TabsContent value="confirmed">
+                <TabsContent value="CONFIRMED">
                   <BookingsTable
                     bookings={bookings.filter(
-                      (booking) => booking.status === "confirmed" && isSameDay(new Date(booking.date), selectedDate),
+                      (booking) => booking.status === "CONFIRMED" && isSameDay(new Date(booking.date), selectedDate),
                     )}
                     onStatusChange={handleStatusChange}
                     formatDate={formatDate}
@@ -576,10 +580,10 @@ export default function Dashboard({mockBookings}: {mockBookings: any[]}) {
                   />
                 </TabsContent>
 
-                <TabsContent value="rejected">
+                <TabsContent value="REJECTED">
                   <BookingsTable
                     bookings={bookings.filter(
-                      (booking) => booking.status === "rejected" && isSameDay(new Date(booking.date), selectedDate),
+                      (booking) => booking.status === "REJECTED" && isSameDay(new Date(booking.date), selectedDate),
                     )}
                     onStatusChange={handleStatusChange}
                     formatDate={formatDate}
@@ -750,28 +754,28 @@ export default function Dashboard({mockBookings}: {mockBookings: any[]}) {
                         {generateTableUsageData().map((table) => (
                           <TableRow key={table.table}>
                             <TableCell className="font-medium">{table.table}</TableCell>
-                            <TableCell className="text-center">{table.confirmed}</TableCell>
-                            <TableCell className="text-center">{table.pending}</TableCell>
-                            <TableCell className="text-center">{table.rejected}</TableCell>
+                            <TableCell className="text-center">{table.CONFIRMED}</TableCell>
+                            <TableCell className="text-center">{table.PENDING}</TableCell>
+                            <TableCell className="text-center">{table.REJECTED}</TableCell>
                             <TableCell className="text-center">{table.total}</TableCell>
                             <TableCell>
                               <div className="flex h-4 w-full overflow-hidden rounded-full">
-                                {table.confirmed > 0 && (
+                                {table.CONFIRMED > 0 && (
                                   <div
                                     className="bg-green-500 h-full"
-                                    style={{ width: `${(table.confirmed / table.total) * 100}%` }}
+                                    style={{ width: `${(table.CONFIRMED / table.total) * 100}%` }}
                                   ></div>
                                 )}
-                                {table.pending > 0 && (
+                                {table.PENDING > 0 && (
                                   <div
                                     className="bg-yellow-500 h-full"
-                                    style={{ width: `${(table.pending / table.total) * 100}%` }}
+                                    style={{ width: `${(table.PENDING / table.total) * 100}%` }}
                                   ></div>
                                 )}
-                                {table.rejected > 0 && (
+                                {table.REJECTED > 0 && (
                                   <div
                                     className="bg-red-500 h-full"
-                                    style={{ width: `${(table.rejected / table.total) * 100}%` }}
+                                    style={{ width: `${(table.REJECTED / table.total) * 100}%` }}
                                   ></div>
                                 )}
                               </div>
@@ -874,7 +878,7 @@ export default function Dashboard({mockBookings}: {mockBookings: any[]}) {
 
 interface BookingsTableProps {
   bookings: any[]
-  onStatusChange: (id: string, status: "confirmed" | "rejected" | "pending") => void
+  onStatusChange: (id: string, status: "CONFIRMED" | "REJECTED" | "PENDING") => void
   formatDate: (date: string) => string
   getStatusBadge: (status: string) => React.JSX.Element
   showDate?: boolean
@@ -931,23 +935,23 @@ function BookingsTable({ bookings, onStatusChange, formatDate, getStatusBadge, s
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    {booking.status !== "confirmed" && (
+                    {booking.status !== "CONFIRMED" && (
                       <DropdownMenuItem
                         className="text-green-600"
-                        onClick={() => onStatusChange(booking.id, "confirmed")}
+                        onClick={() => onStatusChange(booking.id, "CONFIRMED")}
                       >
                         <Check className="w-4 h-4 mr-2" />
                         Confirm
                       </DropdownMenuItem>
                     )}
-                    {booking.status !== "rejected" && (
-                      <DropdownMenuItem className="text-red-600" onClick={() => onStatusChange(booking.id, "rejected")}>
+                    {booking.status !== "REJECTED" && (
+                      <DropdownMenuItem className="text-red-600" onClick={() => onStatusChange(booking.id, "REJECTED")}>
                         <X className="w-4 h-4 mr-2" />
                         Reject
                       </DropdownMenuItem>
                     )}
-                    {(booking.status === "confirmed" || booking.status === "rejected") && (
-                      <DropdownMenuItem onClick={() => onStatusChange(booking.id, "pending")}>
+                    {(booking.status === "CONFIRMED" || booking.status === "REJECTED") && (
+                      <DropdownMenuItem onClick={() => onStatusChange(booking.id, "PENDING")}>
                         Reset to Pending
                       </DropdownMenuItem>
                     )}
