@@ -1,19 +1,12 @@
+'use server'
+
 import { NextResponse, NextRequest } from "next/server";
-import mysql from 'mysql2/promise';
+import { makeQuery } from "@/lib/dbUtils";
+
 
 export async function GET(request: NextRequest) {
-    const connectionParams = {
-        host: 'localhost',
-        port: 3306,
-        user: 'root',
-        password: '',
-        database: 'ZenFlow'
-    };
-
     try {
-        const connection = await mysql.createConnection(connectionParams);
-
-        const [rows] = await connection.query<any>(`
+        const rows: any = await makeQuery(`
              SELECT 
                 B.booking_id AS id,
                 C.name,
@@ -29,9 +22,7 @@ export async function GET(request: NextRequest) {
             JOIN TABLES T ON B.table_id = T.table_id
             WHERE DATE(B.booking_date) = CURDATE()
             ORDER BY B.booking_time DESC
-        `);
-
-        connection.end();
+        `, []);
 
         console.log('Fetched reservations:', rows);
 
