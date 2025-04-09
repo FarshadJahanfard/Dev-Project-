@@ -1,15 +1,24 @@
 import Dashboard from "./dashboard";
+import { headers } from 'next/headers';
+
 const getBookings = async () => {
-  const apiEndpoint = process.env.VERCEL_URL ? 'https://' + process.env.VERCEL_URL : 'http://localhost:3000';
-  const res = await fetch(`${apiEndpoint}/api/bookings`, {
+  const headersList = headers();
+  const host = headersList.get('host');
+  const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https';
+  const baseUrl = `${protocol}://${host}`;
+
+  const res = await fetch(`${baseUrl}/api/bookings`, {
     method: 'GET',
-    cache: 'no-store'
+    cache: 'no-store',
   });
+
   if (!res.ok) {
     throw new Error('Failed to fetch data');
   }
+
   return res.json();
-}
+};
+
 export default async function Page() {
     const bookings = await getBookings();
     console.log(bookings);
