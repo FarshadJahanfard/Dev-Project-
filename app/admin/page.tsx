@@ -1,6 +1,7 @@
 import Dashboard from "./dashboard";
 const getBookings = async () => {
-  const res = await fetch('127.0.0.1/api/bookings', {
+  const apiEndpoint = process.env.NEXT_AUTH_URL;
+  const res = await fetch(`${apiEndpoint}api/bookings`, {
     method: 'GET',
     cache: 'no-store'
   });
