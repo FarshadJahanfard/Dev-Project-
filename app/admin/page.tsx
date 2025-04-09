@@ -1,7 +1,6 @@
-'use client'
 import Dashboard from "./dashboard";
 const getBookings = async () => {
-  const res = await fetch(window.location.protocol + '//' + window.location.host + '/api/bookings', {
+  const res = await fetch('/api/bookings', {
     method: 'GET',
     cache: 'no-store'
   });
