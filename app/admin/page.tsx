@@ -1,7 +1,7 @@
 import Dashboard from "./dashboard";
 const getBookings = async () => {
-  const apiEndpoint = process.env.NEXT_PUBLIC_URL;
-  const res = await fetch(`${process.env.VERCEL_URL}api/bookings`, {
+  const apiEndpoint = process.env.VERCEL_URL ? 'https://' + process.env.VERCEL_URL : 'http://localhost:3000';
+  const res = await fetch(`${apiEndpoint}/api/bookings`, {
     method: 'GET',
     cache: 'no-store'
   });
