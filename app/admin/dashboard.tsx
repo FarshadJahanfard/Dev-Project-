@@ -1,392 +1,203 @@
-"use client"
-import type React from "react"
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Badge } from "@/components/ui/badge"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Calendar as CalendarComponent } from "@/components/ui/calendar"
-import { format, addDays, subDays, isSameDay, parseISO } from "date-fns"
-import Link from "next/link"
-import { updateBookingStatus } from "../action"
-import { useToast } from "@/components/ui/use-toast"
+"use client";
+import type React from "react";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { format, addDays, subDays, isSameDay } from "date-fns";
+import Link from "next/link";
+import { updateBookingStatus } from "../action"; // Adjust path as needed
+import { useToast } from "@/components/ui/use-toast";
 import {
-  Check,
+  Check, 
   X,
-  ArrowLeft,
-  Calendar,
-  MoreHorizontal,
-  ChevronLeft,
-  ChevronRight,
-  LayoutDashboard,
-  BarChart3,
+  ArrowLeft, 
+  Calendar, 
+  LayoutDashboard, 
+  BarChart3, 
   Utensils,
-  Plus,
+  Plus, 
   Settings,
-} from "lucide-react"
+  Clock, 
+} from "lucide-react";
 
-   
+
+import DashboardView from "@/components/views/DashboardView";
+import BookingsView from "@/components/views/BookingsView";
+import AddTableView from "@/components/views/AddTableView";
+import PopularTimesView from "@/components/views/PopularTimesView";
+import TableUsageView from "@/components/views/TableUsageView";
+import SettingsView from "@/components/views/SettingsView";
 
 
-// // Mock data for bookings
-// const test = [
-//   {
-//     id: "1",
-//     name: "John Smith",
-//     email: "john@example.com",
-//     date: "2025-02-26",
-//     time: "19:30",
-//     guests: 4,
-//     notes: "Window seat preferred",
-//     status: "PENDING",
-//     table: "T1",
-//   },
-//   {
-//     id: "2",
-//     name: "Emma Johnson",
-//     email: "emma@example.com",
-//     date: "2025-02-27",
-//     time: "20:30",
-//     guests: 2,
-//     notes: "Anniversary celebration",
-//     status: "CONFIRMED",
-//     table: "T2",
-//   },
-//   {
-//     id: "3",
-//     name: "Michael Brown",
-//     email: "michael@example.com",
-//     date: "2025-02-27",
-//     time: "18:30",
-//     guests: 6,
-//     notes: "Gluten-free options needed for two guests",
-//     status: "PENDING",
-//     table: "T3",
-//   },
-//   {
-//     id: "4",
-//     name: "Sarah Wilson",
-//     email: "sarah@example.com",
-//     date: "2025-02-28",
-//     time: "12:30",
-//     guests: 3,
-//     notes: "",
-//     status: "REJECTED",
-//     table: "T4",
-//   },
-//   {
-//     id: "5",
-//     name: "David Lee",
-//     email: "david@example.com",
-//     date: "2025-02-28",
-//     time: "13:30",
-//     guests: 2,
-//     notes: "Vegetarian options needed",
-//     status: "PENDING",
-//     table: "T5",
-//   },
-//   {
-//     id: "6",
-//     name: "Lisa Chen",
-//     email: "lisa@example.com",
-//     date: "2025-02-26",
-//     time: "18:00",
-//     guests: 4,
-//     notes: "Birthday celebration",
-//     status: "CONFIRMED",
-//     table: "T1",
-//   },
-//   {
-//     id: "7",
-//     name: "Robert Taylor",
-//     email: "robert@example.com",
-//     date: "2025-02-26",
-//     time: "19:00",
-//     guests: 2,
-//     notes: "",
-//     status: "CONFIRMED",
-//     table: "T1",
-//   },
-//   {
-//     id: "8",
-//     name: "Jennifer Adams",
-//     email: "jennifer@example.com",
-//     date: "2025-02-26",
-//     time: "20:00",
-//     guests: 5,
-//     notes: "Allergy to nuts",
-//     status: "CONFIRMED",
-//     table: "T8",
-//   },
-//   {
-//     id: "9",
-//     name: "Thomas Wilson",
-//     email: "thomas@example.com",
-//     date: "2025-02-26",
-//     time: "18:30",
-//     guests: 3,
-//     notes: "",
-//     status: "CONFIRMED",
-//     table: "T9",
-//   },
-//   {
-//     id: "10",
-//     name: "Maria Garcia",
-//     email: "maria@example.com",
-//     date: "2025-02-26",
-//     time: "19:15",
-//     guests: 2,
-//     notes: "Anniversary",
-//     status: "CONFIRMED",
-//     table: "T10",
-//   },
-// ]
+// Define the shape of a booking object (keep here for state typing)
+interface Booking {
+  id: string;
+  name: string;
+  email: string;
+  date: string;
+  time: string;
+  guests: number;
+  notes: string;
+  status: "PENDING" | "CONFIRMED" | "REJECTED";
+  table: string;
+}
 
-type ViewType = "dashboard" | "bookings" | "Add Table" | "popularTimes" | "tableUsage" | "settings" 
 
-export default function Dashboard({mockBookings}: {mockBookings: any[]}) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [username, setUsername] = useState("")
-  const [password, setPassword] = useState("")
-  const [selectedDate, setSelectedDate] = useState(new Date())
-  const [currentView, setCurrentView] = useState<ViewType>("dashboard")
-  const [bookings, setBookings] = useState(
+// Define the types for the views
+type ViewType = "dashboard" | "bookings" | "Add Table" | "popularTimes" | "tableUsage" | "settings";
+
+// Main Dashboard Component
+export default function Dashboard({ mockBookings }: { mockBookings: Booking[] }) { // Use the Booking type
+  // --- State variables remain the same ---
+  const [isAuthenticated, setIsAuthenticated] = useState(true); // Assume logged in for now, remove login logic or keep as is
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [currentView, setCurrentView] = useState<ViewType>("dashboard");
+  const [bookings, setBookings] = useState<Booking[]>( // Use the Booking type
     [...mockBookings].sort((a, b) => {
-      const [aHour, aMinute] = a.time.split(":").map(Number)
-      const [bHour, bMinute] = b.time.split(":").map(Number)
-
-      const aDate = new Date(a.date)
-      const bDate = new Date(b.date)
-
-      aDate.setHours(aHour, aMinute, 0)
-      bDate.setHours(bHour, bMinute, 0)
-
-      return aDate.getTime() - bDate.getTime()
+      // Sort logic remains the same
+      const [aHour, aMinute] = a.time.split(":").map(Number);
+      const [bHour, bMinute] = b.time.split(":").map(Number);
+      const aDate = new Date(a.date);
+      const bDate = new Date(b.date);
+      aDate.setHours(aHour, aMinute, 0);
+      bDate.setHours(bHour, bMinute, 0);
+      return aDate.getTime() - bDate.getTime();
     }),
-  )
-  const { toast } = useToast()
+  );
+  const { toast } = useToast();
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (username === "admin" && password === "password") {
-      setIsAuthenticated(true)
-      toast({
-        title: "Login successful",
-        description: "Welcome to the admin dashboard",
-      })
-    } else {
-      toast({
-        title: "Login failed",
-        description: "Invalid username or password",
-        variant: "destructive",
-      })
-    }
-  }
+  // --- Handlers remain the same ---
+  // handleLogin logic... (keep or remove based on auth flow)
 
   const handleStatusChange = async (bookingId: string, newStatus: "CONFIRMED" | "REJECTED" | "PENDING") => {
     try {
-      console.log("Handle status change for booking:", bookingId, "to status:", newStatus)
-      const result = await updateBookingStatus(bookingId, newStatus)
+      console.log("Handle status change for booking:", bookingId, "to status:", newStatus);
+      const result = await updateBookingStatus(bookingId, newStatus);
 
       if (result.success) {
         const updatedBookings = bookings.map((booking) =>
           booking.id === bookingId ? { ...booking, status: newStatus } : booking,
-        )
+        );
 
+        // Re-sort after status change
         const sortedBookings = [...updatedBookings].sort((a, b) => {
-          const [aHour, aMinute] = a.time.split(":").map(Number)
-          const [bHour, bMinute] = b.time.split(":").map(Number)
+             const [aHour, aMinute] = a.time.split(":").map(Number);
+             const [bHour, bMinute] = b.time.split(":").map(Number);
+             const aDate = new Date(a.date);
+             const bDate = new Date(b.date);
+             aDate.setHours(aHour, aMinute, 0);
+             bDate.setHours(bHour, bMinute, 0);
+             return aDate.getTime() - bDate.getTime();
+        });
 
-          const aDate = new Date(a.date)
-          const bDate = new Date(b.date)
-
-          aDate.setHours(aHour, aMinute, 0)
-          bDate.setHours(bHour, bMinute, 0)
-
-          return aDate.getTime() - bDate.getTime()
-        })
-
-        setBookings(sortedBookings)
+        setBookings(sortedBookings);
 
         toast({
           title: "Status updated",
-          description: `Booking #${bookingId} has been ${newStatus}`,
-        })
+          description: `Booking #${bookingId} status changed to ${newStatus}`,
+        });
       } else {
         toast({
           title: "Error",
-          description: "Failed to update booking status",
+          description: result.error || "Failed to update booking status",
           variant: "destructive",
-        })
+        });
       }
     } catch (error) {
+        console.error("Error updating status:", error);
       toast({
         title: "Error",
-        description: "An unexpected error occurred",
+        description: "An unexpected error occurred while updating status.",
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr)
-    return date.toLocaleDateString("en-US", {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    })
-  }
+  const formatDate = (dateStr: string): string => {
+    try {
+        const date = new Date(dateStr);
+         // Add time zone offset to treat date string as local
+         const offset = date.getTimezoneOffset() * 60000;
+         const localDate = new Date(date.getTime() + offset);
+        return localDate.toLocaleDateString("en-GB", { // Use en-GB for DD/MM/YYYY or en-US for MM/DD/YYYY
+          // weekday: "short",
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        });
+    } catch (e) {
+        console.error("Error formatting date:", dateStr, e);
+        return "Invalid Date";
+    }
+  };
 
-  const getStatusBadge = (status: string) => {
+
+  const getStatusBadge = (status: string): React.ReactElement<typeof Badge> => {
     switch (status) {
       case "CONFIRMED":
-        return <Badge className="bg-green-500 hover:bg-green-600">Confirmed</Badge>
+        return <Badge className="bg-green-500 hover:bg-green-600">Confirmed</Badge>;
       case "REJECTED":
-        return <Badge variant="destructive">Rejected</Badge>
+        return <Badge variant="destructive">Rejected</Badge>;
       case "PENDING":
       default:
         return (
           <Badge variant="outline" className="text-yellow-600 border-yellow-600">
             Pending
           </Badge>
-        )
+        );
     }
-  }
+  };
 
   const handlePreviousDay = () => {
-    setSelectedDate((prev) => subDays(prev, 1))
-  }
+    setSelectedDate((prev) => prev ? subDays(prev, 1) : new Date());
+  };
 
   const handleNextDay = () => {
-    setSelectedDate((prev) => addDays(prev, 1))
+    setSelectedDate((prev) => prev ? addDays(prev, 1) : new Date());
+  };
+
+  const handleSetSelectedDate = (date: Date | undefined) => {
+      setSelectedDate(date);
   }
 
+  // --- Remove generatePopularTimesData and generateTableUsageData (moved to views) ---
 
-  
+   // Login rendering logic (keep or remove based on auth flow)
+   if (!isAuthenticated) {
+     // return ( ... login JSX ... );
+     // For now, let's skip the login screen to focus on the main layout
+   }
 
-  // Generate data for popular times chart
-  const generatePopularTimesData = () => {
-    const hourCounts = Array(24).fill(0)
-    const hourGuests = Array(24).fill(0)
-
-    bookings.forEach((booking) => {
-      const [hour] = booking.time.split(":").map(Number)
-      hourCounts[hour]++
-      hourGuests[hour] += booking.guests
-    })
-
-    return hourCounts.map((count, hour) => ({
-      hour: `${hour.toString().padStart(2, "0")}:00`,
-      count,
-      guests: hourGuests[hour],
-    }))
-  }
-
-  // Generate data for table usage
-  const generateTableUsageData = () => {
-    const tables = {}
-
-    bookings.forEach((booking) => {
-      if (!tables[booking.table]) {
-        tables[booking.table] = {
-          CONFIRMED: 0,
-          PENDING: 0,
-          REJECTED: 0,
-          total: 0,
-        }
-      }
-
-      tables[booking.table][booking.status]++
-      tables[booking.table].total++
-    })
-
-    return Object.entries(tables)
-      .map(([table, data]) => ({
-        table,
-        ...(data as any),
-      }))
-      .sort((a, b) => a.table.localeCompare(b.table))
-  }
-
-  // if (!isAuthenticated) {
-  //   return (
-  //     <div className="min-h-screen flex items-center justify-center bg-muted">
-  //       <Card className="w-full max-w-md">
-  //         <CardHeader>
-  //           <div className="flex items-center justify-between">
-  //             <Link href="/" className="text-sm text-muted-foreground hover:text-primary flex items-center gap-1">
-  //               <ArrowLeft className="h-4 w-4" /> Back to Website
-  //             </Link>
-  //           </div>
-  //           <CardTitle className="text-2xl font-playfair text-center mt-4">ZenFlow Admin</CardTitle>
-  //           <CardDescription className="text-center">Login to manage reservations</CardDescription>
-  //         </CardHeader>
-  //         <form onSubmit={handleLogin}>
-  //           <CardContent className="space-y-4">
-  //             <div className="space-y-2">
-  //               <Label htmlFor="username">Username</Label>
-  //               <Input id="username" value={username} onChange={(e) => setUsername(e.target.value)} required />
-  //             </div>
-  //             <div className="space-y-2">
-  //               <Label htmlFor="password">Password</Label>
-  //               <Input
-  //                 id="password"
-  //                 type="password"
-  //                 value={password}
-  //                 onChange={(e) => setPassword(e.target.value)}
-  //                 required
-  //               />
-  //             </div>
-  //           </CardContent>
-  //           <CardFooter>
-  //             <Button type="submit" className="w-full bg-secondary hover:bg-secondary/90 text-primary">
-  //               Login
-  //             </Button>
-  //           </CardFooter>
-  //         </form>
-  //         <div className="px-6 pb-6">
-  //           <p className="text-xs text-center text-muted-foreground mt-4">
-  //             For demo purposes, use username: <span className="font-semibold">admin</span> and password:{" "}
-  //             <span className="font-semibold">password</span>
-  //           </p>
-  //         </div>
-  //       </Card>
-  //     </div>
-  //   )
-  // }
-
+  // --- Main Render ---
   return (
-    <div className="min-h-screen bg-muted">
-      <header className="bg-primary text-primary-foreground py-4">
-        <div className="container flex justify-between items-center">
+    <div className="min-h-screen bg-muted/40"> {/* Adjusted background */}
+      <header className="bg-primary text-primary-foreground py-4 sticky top-0 z-10 shadow-sm">
+        <div className="container mx-auto flex justify-between items-center px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2">
             <Link href="/" className="text-2xl font-playfair font-bold">
               ZenFlow
             </Link>
-            <span className="text-sm bg-secondary/20 px-2 py-0.5 rounded">Admin</span>
+            <span className="text-xs sm:text-sm bg-secondary/20 px-2 py-0.5 rounded">Admin</span>
           </div>
-          <Button
+          {/* Add logout logic if needed */}
+          {/* <Button
             variant="ghost"
             onClick={() => setIsAuthenticated(false)}
-            className="text-primary-foreground hover:text-primary-foreground/80"
+            className="text-primary-foreground hover:bg-primary/80 hover:text-primary-foreground"
           >
             Logout
-          </Button>
+          </Button> */}
         </div>
       </header>
 
       <div className="flex">
         {/* Sidebar */}
-        <aside className="w-64 min-h-[calc(100vh-4rem)] bg-card border-r">
+        <aside className="w-64 min-h-[calc(100vh-64px)] bg-card border-r fixed top-[64px] left-0 h-full"> {/* Fixed position sidebar */}
           <div className="p-4">
-            <h2 className="text-lg font-semibold mb-4">Management</h2>
-            <nav className="space-y-2">
+             <h2 className="text-lg font-semibold mb-4 px-2">Management</h2>
+             <nav className="space-y-1">
               <Button
                 variant={currentView === "dashboard" ? "secondary" : "ghost"}
                 className="w-full justify-start"
@@ -403,18 +214,18 @@ export default function Dashboard({mockBookings}: {mockBookings: any[]}) {
                 <Calendar className="mr-2 h-4 w-4" />
                 Bookings
               </Button>
+               <Button
+                   variant={currentView === "Add Table" ? "secondary" : "ghost"}
+                   className="w-full justify-start"
+                   onClick={() => setCurrentView("Add Table")}
+               >
+                   <Plus className="mr-2 h-4 w-4" />
+                   Add Table
+               </Button>
             </nav>
 
-            <h2 className="text-lg font-semibold mt-6 mb-4">Analytics</h2>
-            <nav className="space-y-2">
-                  <Button
-                  variant={currentView === "Add Table" ? "secondary" : "ghost"}
-                  className="w-full justify-start"
-                  onClick={() => setCurrentView("Add Table")}
-                  >
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Table
-                  </Button>
+             <h2 className="text-lg font-semibold mt-6 mb-4 px-2">Analytics</h2>
+             <nav className="space-y-1">
               <Button
                 variant={currentView === "popularTimes" ? "secondary" : "ghost"}
                 className="w-full justify-start"
@@ -433,8 +244,8 @@ export default function Dashboard({mockBookings}: {mockBookings: any[]}) {
               </Button>
             </nav>
 
-            <h2 className="text-lg font-semibold mt-6 mb-4">System</h2>
-            <nav className="space-y-2">
+             <h2 className="text-lg font-semibold mt-6 mb-4 px-2">System</h2>
+             <nav className="space-y-1">
               <Button
                 variant={currentView === "settings" ? "secondary" : "ghost"}
                 className="w-full justify-start"
@@ -447,522 +258,48 @@ export default function Dashboard({mockBookings}: {mockBookings: any[]}) {
           </div>
         </aside>
 
-        {/* Main Content */}
-        <main className="flex-1 p-8">
+        {/* Main Content Area */}
+         <main className="flex-1 p-6 sm:p-8 ml-64 mt-[64px]"> {/* Add margin-left to offset fixed sidebar */}
+          {/* --- Conditional Rendering of Views --- */}
           {currentView === "dashboard" && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-playfair">Dashboard</h1>
-              </div>
-
-              <Tabs defaultValue="all" className="w-full">
-                <TabsList>
-                  <TabsTrigger value="all">All</TabsTrigger>
-                  <TabsTrigger value="PENDING">Pending</TabsTrigger>
-                  <TabsTrigger value="CONFIRMED">Confirmed</TabsTrigger>
-                  <TabsTrigger value="REJECTED">Rejected</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="all">
-                  <BookingsTable
-                    bookings={bookings}
-                    onStatusChange={handleStatusChange}
-                    formatDate={formatDate}
-                    getStatusBadge={getStatusBadge}
-                    showDate
-                  />
-                </TabsContent>
-
-                <TabsContent value="PENDING">
-                  <BookingsTable
-                    bookings={bookings.filter((booking) => booking.status === "PENDING")}
-                    onStatusChange={handleStatusChange}
-                    formatDate={formatDate}
-                    getStatusBadge={getStatusBadge}
-                    showDate
-                  />
-                </TabsContent>
-
-                <TabsContent value="CONFIRMED">
-                  <BookingsTable
-                    bookings={bookings.filter((booking) => booking.status === "CONFIRMED")}
-                    onStatusChange={handleStatusChange}
-                    formatDate={formatDate}
-                    getStatusBadge={getStatusBadge}
-                    showDate
-                  />
-                </TabsContent>
-
-                <TabsContent value="REJECTED">
-                  <BookingsTable
-                    bookings={bookings.filter((booking) => booking.status === "REJECTED")}
-                    onStatusChange={handleStatusChange}
-                    formatDate={formatDate}
-                    getStatusBadge={getStatusBadge}
-                    showDate
-                  />
-                </TabsContent>
-              </Tabs>
-            </div>
+            <DashboardView
+              bookings={bookings}
+              onStatusChange={handleStatusChange}
+              formatDate={formatDate}
+              getStatusBadge={getStatusBadge}
+            />
           )}
 
-          {currentView === "bookings" && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h1 className="text-3xl font-playfair">Bookings</h1>
-                  <p className="text-muted-foreground">Manage restaurant reservations</p>
-                </div>
-                <div className="flex items-center gap-4">
-                  <Button variant="outline" size="icon" onClick={handlePreviousDay}>
-                    <ChevronLeft className="h-4 w-4" />
-                    <span className="sr-only">Previous day</span>
-                  </Button>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" className="min-w-[240px] justify-start text-left font-normal">
-                        <Calendar className="mr-2 h-4 w-4" />
-                        {format(selectedDate, "EEEE, MMMM d, yyyy")}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <CalendarComponent
-                        mode="single"
-                        selected={selectedDate}
-                        onSelect={(date) => date && setSelectedDate(date)}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <Button variant="outline" size="icon" onClick={handleNextDay}>
-                    <ChevronRight className="h-4 w-4" />
-                    <span className="sr-only">Next day</span>
-                  </Button>
-                </div>
-              </div>
-
-              <Tabs defaultValue="all" className="w-full">
-                <TabsList>
-                  <TabsTrigger value="all">All</TabsTrigger>
-                  <TabsTrigger value="PENDING">Pending</TabsTrigger>
-                  <TabsTrigger value="CONFIRMED">Confirmed</TabsTrigger>
-                  <TabsTrigger value="REJECTED">Rejected</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="all">
-                  <BookingsTable
-                    bookings={bookings.filter((booking) => isSameDay(new Date(booking.date), selectedDate))}
-                    onStatusChange={handleStatusChange}
-                    formatDate={formatDate}
-                    getStatusBadge={getStatusBadge}
-                  />
-                </TabsContent>
-
-                <TabsContent value="PENDING">
-                  <BookingsTable
-                    bookings={bookings.filter(
-                      (booking) => booking.status === "PENDING" && isSameDay(new Date(booking.date), selectedDate),
-                    )}
-                    onStatusChange={handleStatusChange}
-                    formatDate={formatDate}
-                    getStatusBadge={getStatusBadge}
-                  />
-                </TabsContent>
-
-                <TabsContent value="CONFIRMED">
-                  <BookingsTable
-                    bookings={bookings.filter(
-                      (booking) => booking.status === "CONFIRMED" && isSameDay(new Date(booking.date), selectedDate),
-                    )}
-                    onStatusChange={handleStatusChange}
-                    formatDate={formatDate}
-                    getStatusBadge={getStatusBadge}
-                  />
-                </TabsContent>
-
-                <TabsContent value="REJECTED">
-                  <BookingsTable
-                    bookings={bookings.filter(
-                      (booking) => booking.status === "REJECTED" && isSameDay(new Date(booking.date), selectedDate),
-                    )}
-                    onStatusChange={handleStatusChange}
-                    formatDate={formatDate}
-                    getStatusBadge={getStatusBadge}
-                  />
-                </TabsContent>
-              </Tabs>
-            </div>
+          {currentView === "bookings" && selectedDate && ( // Ensure selectedDate is not undefined
+            <BookingsView
+               bookings={bookings}
+               selectedDate={selectedDate}
+               onStatusChange={handleStatusChange}
+               formatDate={formatDate}
+               getStatusBadge={getStatusBadge}
+               handlePreviousDay={handlePreviousDay}
+               handleNextDay={handleNextDay}
+               setSelectedDate={handleSetSelectedDate}
+            />
           )}
 
-            {currentView === "Add Table" && (
-              <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div>
-                <h1 className="text-3xl font-playfair">Add Table</h1>
-                <p className="text-muted-foreground">Add new tables to the system</p>
-                </div>
-              </div>
-              <Card>
-                <CardHeader>
-                <CardTitle>Add a New Table</CardTitle>
-                <CardDescription>Provide details for the new table</CardDescription>
-                </CardHeader>
-                <CardContent>
-                <form
-                  onSubmit={(e) => {
-                  e.preventDefault()
-                  const formData = new FormData(e.target as HTMLFormElement)
-                  const tableNumber = formData.get("tableNumber") as string
-                  const capacity = formData.get("capacity") as string
-                  const location = formData.get("location") as string
-                  const isActive = formData.get("isActive") as string
-
-                  if (tableNumber.trim() && capacity.trim() && location.trim() && isActive.trim()) {
-                    toast({
-                    title: "Table Added",
-                    description: `Table "${tableNumber}" has been added successfully.`,
-                    })
-                  } else {
-                    toast({
-                    title: "Error",
-                    description: "All fields are required.",
-                    variant: "destructive",
-                    })
-                  }
-                  }}
-                >
-                  <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="tableNumber">Table Number</Label>
-                    <Input id="tableNumber" name="tableNumber" placeholder="Enter table number" required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="capacity">Capacity</Label>
-                    <Input id="capacity" name="capacity" type="number" placeholder="Enter table capacity" required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="location">Location</Label>
-                    <Input id="location" name="location" placeholder="Enter table location" required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="isActive">Is Active</Label>
-                    <select id="isActive" name="isActive" className="w-full border rounded px-3 py-2" required>
-                    <option value="">Select</option>
-                    <option value="yes">Yes</option>
-                    <option value="no">No</option>
-                    </select>
-                  </div>
-                  </div>
-                  <CardFooter>
-                        <div className="mt-4">
-                          <Button type="submit" className="w-full bg-secondary hover:bg-secondary/90 text-primary">
-                            Add Table
-                          </Button>
-                        </div>
-                      </CardFooter>
-                    </form>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
+          {currentView === "Add Table" && (
+            <AddTableView /> // Pass props if AddTableView needs them later
+          )}
 
           {currentView === "popularTimes" && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h1 className="text-3xl font-playfair">Popular Times</h1>
-                  <p className="text-muted-foreground">Analyze peak booking hours</p>
-                </div>
-              </div>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Bookings by Hour</CardTitle>
-                  <CardDescription>Visualize the most popular booking hours across all dates</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-80 flex items-end gap-2">
-                    {generatePopularTimesData()
-                      .filter((data) => data.count > 0)
-                      .map((data) => (
-                        <div key={data.hour} className="flex flex-col items-center flex-1">
-                          <div
-                            className="bg-secondary w-full rounded-t-md"
-                            style={{ height: `${Math.max(5, data.count * 30)}px` }}
-                          ></div>
-                          <div className="text-xs mt-2 text-center">{data.hour}</div>
-                          <div className="text-xs text-muted-foreground">{data.count} bookings</div>
-                        </div>
-                      ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Guest Count by Hour</CardTitle>
-                  <CardDescription>Total number of guests during each hour</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-80 flex items-end gap-2">
-                    {generatePopularTimesData()
-                      .filter((data) => data.guests > 0)
-                      .map((data) => (
-                        <div key={data.hour} className="flex flex-col items-center flex-1">
-                          <div
-                            className="bg-primary w-full rounded-t-md"
-                            style={{ height: `${Math.max(5, data.guests * 10)}px` }}
-                          ></div>
-                          <div className="text-xs mt-2 text-center">{data.hour}</div>
-                          <div className="text-xs text-muted-foreground">{data.guests} guests</div>
-                        </div>
-                      ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+            <PopularTimesView bookings={bookings} />
           )}
 
           {currentView === "tableUsage" && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h1 className="text-3xl font-playfair">Table Usage</h1>
-                  <p className="text-muted-foreground">Analyze table utilization and booking status</p>
-                </div>
-              </div>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Table Booking Distribution</CardTitle>
-                  <CardDescription>Overview of bookings by table and status</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="rounded-md border">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Table</TableHead>
-                          <TableHead className="text-center">Confirmed</TableHead>
-                          <TableHead className="text-center">Pending</TableHead>
-                          <TableHead className="text-center">Rejected</TableHead>
-                          <TableHead className="text-center">Total</TableHead>
-                          <TableHead>Usage Distribution</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {generateTableUsageData().map((table) => (
-                          <TableRow key={table.table}>
-                            <TableCell className="font-medium">{table.table}</TableCell>
-                            <TableCell className="text-center">{table.CONFIRMED}</TableCell>
-                            <TableCell className="text-center">{table.PENDING}</TableCell>
-                            <TableCell className="text-center">{table.REJECTED}</TableCell>
-                            <TableCell className="text-center">{table.total}</TableCell>
-                            <TableCell>
-                              <div className="flex h-4 w-full overflow-hidden rounded-full">
-                                {table.CONFIRMED > 0 && (
-                                  <div
-                                    className="bg-green-500 h-full"
-                                    style={{ width: `${(table.CONFIRMED / table.total) * 100}%` }}
-                                  ></div>
-                                )}
-                                {table.PENDING > 0 && (
-                                  <div
-                                    className="bg-yellow-500 h-full"
-                                    style={{ width: `${(table.PENDING / table.total) * 100}%` }}
-                                  ></div>
-                                )}
-                                {table.REJECTED > 0 && (
-                                  <div
-                                    className="bg-red-500 h-full"
-                                    style={{ width: `${(table.REJECTED / table.total) * 100}%` }}
-                                  ></div>
-                                )}
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">Most Used Table</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-3xl font-bold">
-                      {generateTableUsageData().sort((a, b) => b.total - a.total)[0]?.table || "N/A"}
-                    </div>
-                    <p className="text-muted-foreground text-sm">
-                      {generateTableUsageData().sort((a, b) => b.total - a.total)[0]?.total || 0} bookings
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">Least Used Table</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-3xl font-bold">
-                      {generateTableUsageData().sort((a, b) => a.total - b.total)[0]?.table || "N/A"}
-                    </div>
-                    <p className="text-muted-foreground text-sm">
-                      {generateTableUsageData().sort((a, b) => a.total - b.total)[0]?.total || 0} bookings
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">Average Bookings per Table</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-3xl font-bold">
-                      {(bookings.length / generateTableUsageData().length).toFixed(1)}
-                    </div>
-                    <p className="text-muted-foreground text-sm">Across {generateTableUsageData().length} tables</p>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
+            <TableUsageView bookings={bookings} />
           )}
 
           {currentView === "settings" && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h1 className="text-3xl font-playfair">Settings</h1>
-                  <p className="text-muted-foreground">Configure system preferences</p>
-                </div>
-              </div>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>System Settings</CardTitle>
-                  <CardDescription>Manage your restaurant system settings</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="restaurant-name">Restaurant Name</Label>
-                    <Input id="restaurant-name" defaultValue="Capri at the dam" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="opening-time">Opening Time</Label>
-                    <Input id="opening-time" defaultValue="10:30" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="closing-time">Closing Time</Label>
-                    <Input id="closing-time" defaultValue="22:00" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="booking-interval">Booking Interval (minutes)</Label>
-                    <Input id="booking-interval" type="number" defaultValue="30" />
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Button className="bg-secondary hover:bg-secondary/90 text-primary">Save Changes</Button>
-                </CardFooter>
-              </Card>
-            </div>
+            <SettingsView /> // Pass props if SettingsView needs them later
           )}
         </main>
       </div>
     </div>
-  )
+  );
 }
-
-interface BookingsTableProps {
-  bookings: any[]
-  onStatusChange: (id: string, status: "CONFIRMED" | "REJECTED" | "PENDING") => void
-  formatDate: (date: string) => string
-  getStatusBadge: (status: string) => React.JSX.Element
-  showDate?: boolean
-}
-
-function BookingsTable({ bookings, onStatusChange, formatDate, getStatusBadge, showDate = false }: BookingsTableProps) {
-  if (bookings.length === 0) {
-    return (
-      <div className="rounded-md border">
-        <div className="flex flex-col items-center justify-center py-8 text-center">
-          <Calendar className="h-8 w-8 text-muted-foreground mb-4" />
-          <h3 className="text-lg font-medium">No bookings found</h3>
-          <p className="text-sm text-muted-foreground">Try selecting a different date or status filter.</p>
-        </div>
-      </div>
-    )
-  }
-
-  return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Table</TableHead>
-            <TableHead>Status</TableHead>
-            {showDate && <TableHead>Date</TableHead>}
-            <TableHead>Time</TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead className="text-center">Guests</TableHead>
-            <TableHead>Notes</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {bookings.map((booking) => (
-            <TableRow key={booking.id}>
-              <TableCell className="font-medium">{booking.table}</TableCell>
-              <TableCell>{getStatusBadge(booking.status)}</TableCell>
-              {showDate && <TableCell>{formatDate(booking.date)}</TableCell>}
-              <TableCell>{booking.time}</TableCell>
-              <TableCell>{booking.name}</TableCell>
-              <TableCell className="text-muted-foreground">{booking.email}</TableCell>
-              <TableCell className="text-center">{booking.guests}</TableCell>
-              <TableCell className="max-w-[200px] truncate" title={booking.notes}>
-                {booking.notes || "-"}
-              </TableCell>
-              <TableCell className="text-right">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <MoreHorizontal className="w-4 h-4" />
-                      <span className="sr-only">Actions</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    {booking.status !== "CONFIRMED" && (
-                      <DropdownMenuItem
-                        className="text-green-600"
-                        onClick={() => onStatusChange(booking.id, "CONFIRMED")}
-                      >
-                        <Check className="w-4 h-4 mr-2" />
-                        Confirm
-                      </DropdownMenuItem>
-                    )}
-                    {booking.status !== "REJECTED" && (
-                      <DropdownMenuItem className="text-red-600" onClick={() => onStatusChange(booking.id, "REJECTED")}>
-                        <X className="w-4 h-4 mr-2" />
-                        Reject
-                      </DropdownMenuItem>
-                    )}
-                    {(booking.status === "CONFIRMED" || booking.status === "REJECTED") && (
-                      <DropdownMenuItem onClick={() => onStatusChange(booking.id, "PENDING")}>
-                        Reset to Pending
-                      </DropdownMenuItem>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
-  )
-}
-

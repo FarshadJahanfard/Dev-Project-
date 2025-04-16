@@ -215,7 +215,7 @@ export default function Home() {
               </SelectContent>
             </Select>
             </div>
-          <div className="space-y-2">
+            <div className="space-y-2">
             <Label htmlFor="notes" className="text-base">
               Special Requests
             </Label>
@@ -226,10 +226,11 @@ export default function Home() {
               id="notes"
               name="notes"
               placeholder="Any special requests or dietary requirements?"
-              className="min-h-[120px] resize-none border-secondary/20"
+              className="min-h-[100px] resize-none border-secondary/20"
             />
-          </div>
-          <CardFooter className="flex flex-col gap-4">
+            </div>
+            <div className="mb-5"></div>
+            <CardFooter className="flex flex-col gap-10">
             <Button type="submit" className="w-full bg-secondary hover:bg-secondary/90 text-primary">
               Request Reservation
             </Button>
