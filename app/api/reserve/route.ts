@@ -2,22 +2,22 @@ import { NextResponse, NextRequest } from "next/server";
 import mysql from 'mysql2/promise';
 import {sendConfirmationEmail} from "@/lib/sendEmail/emailServer"
 
-export async function POST(request: Request) {
-    const connectionParams = {
-        host: 'localhost',
-        port: 3306,
-        user: 'root',
-        password: '',
-        database: 'ZenFlow'
-    }
+const CONNECTION_PARAMS = {
+    host: 'localhost',
+    port: 3306,
+    user: 'root',
+    password: '',
+    database: 'ZenFlow'
+}
 
+export async function POST(request: Request) {
     const reservationData = await request.json()
     console.log('Received reservation data:', reservationData);
     const { name, email, date, time, guests, notes } = reservationData;
     console.log('Parsed reservation data:', { name, email, date, time, guests, notes });
 
     try {
-        const connection = await mysql.createConnection(connectionParams); // Create a connection to the database
+        const connection = await mysql.createConnection(CONNECTION_PARAMS); // Create a connection to the database
         const [customer_records] = await connection.query<any>('SELECT customer_id, name, email FROM CUSTOMERS WHERE name=? OR email=?', [name, email]); // Check if the customer already exists
         let customerID = undefined;
 
@@ -68,7 +68,7 @@ export async function POST(request: Request) {
 
         const tableID = possibleTables[0]; // Get the first available table
 
-        // Now you can use customerID to insert a reservation
+        // Now can use customerID to insert a reservation
         const [reservation] = await connection.query<any>('INSERT INTO BOOKINGS (table_id, customer_id, booking_date, booking_time, guests, special_requests, status) VALUES (?, ?, ?, ?, ?, ?, "PENDING")', [tableID, customerID, date, time, guests, notes]);
         console.log('Inserted reservation:', reservation.insertId);
 
@@ -97,16 +97,8 @@ export async function POST(request: Request) {
 
 // new api for fetching reservations to show in admin panel
 export async function GET(request: NextRequest) {
-    const connectionParams = {
-        host: 'localhost',
-        port: 3306,
-        user: 'root',
-        password: '',
-        database: 'ZenFlow'
-    };
-
     try {
-        const connection = await mysql.createConnection(connectionParams); // Create a connection to the database
+        const connection = await mysql.createConnection(CONNECTION_PARAMS); // Create a connection to the database
         const [reservations] = await connection.query<any>('SELECT * FROM BOOKINGS'); // Fetch all reservations
         connection.end();
 

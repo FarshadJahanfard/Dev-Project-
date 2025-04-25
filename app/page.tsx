@@ -135,7 +135,10 @@ export default function Home() {
             throw new Error("Failed to submit reservation");
               }
 
-              alert("Reservation request submitted successfully!");
+              const respJSON = await response.json();
+              const reservationID = respJSON.reservation.booking_id;
+
+              window.location.href = `/booking/${reservationID}`;
             } catch (error) {
               console.error(error);
               alert("An error occurred while submitting your reservation.");
