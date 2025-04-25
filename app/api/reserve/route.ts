@@ -1,5 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import mysql from 'mysql2/promise';
+import {sendConfirmationEmail} from "@/lib/sendEmail/emailServer"
 
 export async function POST(request: Request) {
     const connectionParams = {
@@ -17,7 +18,7 @@ export async function POST(request: Request) {
 
     try {
         const connection = await mysql.createConnection(connectionParams); // Create a connection to the database
-        const [customer_records] = await connection.query<any>('SELECT customer_id, name, email FROM CUSTOMERS WHERE name=? AND email=?', [name, email]); // Check if the customer already exists
+        const [customer_records] = await connection.query<any>('SELECT customer_id, name, email FROM CUSTOMERS WHERE name=? OR email=?', [name, email]); // Check if the customer already exists
         let customerID = undefined;
 
         if (customer_records.length > 0) {
@@ -74,6 +75,18 @@ export async function POST(request: Request) {
         const [newReservation] = await connection.query<any>('SELECT * FROM BOOKINGS WHERE booking_id = ?', [reservation.insertId]);
         console.log('New reservation:', newReservation);
         connection.end();
+
+        // send email confirmation 
+
+        await sendConfirmationEmail(
+            email, {
+                time,
+                name,
+                date,
+                guests,
+                reservationID: reservation.insertId
+            }
+        )
 
         return NextResponse.json({ reservation: newReservation[0] }, { status: 200 });
     } catch (error) {
