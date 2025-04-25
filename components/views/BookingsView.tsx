@@ -98,7 +98,7 @@ const BookingsView: React.FC<BookingsViewProps> = ({
             onStatusChange={onStatusChange}
             formatDate={formatDate}
             getStatusBadge={getStatusBadge}
-            showDate={false} // Don't show date column here as it's filtered by day
+            showDate={false}
           />
         </TabsContent>
 

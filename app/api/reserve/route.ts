@@ -18,7 +18,7 @@ export async function POST(request: Request) {
 
     try {
         const connection = await mysql.createConnection(CONNECTION_PARAMS); // Create a connection to the database
-        const [customer_records] = await connection.query<any>('SELECT customer_id, name, email FROM CUSTOMERS WHERE name=? OR email=?', [name, email]); // Check if the customer already exists
+        const [customer_records] = await connection.query<any>('SELECT customer_id, name, email FROM CUSTOMERS WHERE name=? AND email=?', [name, email]); // Check if the customer already exists
         let customerID = undefined;
 
         if (customer_records.length > 0) {
