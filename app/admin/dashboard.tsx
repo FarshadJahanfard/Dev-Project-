@@ -3,9 +3,12 @@ import type React from "react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { format, addDays, subDays, isSameDay } from "date-fns";
 import Link from "next/link";
-import { updateBookingStatus } from "../action"; // Adjust path as needed
+import { updateBookingStatus } from "../action"; 
 import { useToast } from "@/components/ui/use-toast";
 import {
   Check, 
@@ -20,7 +23,6 @@ import {
   Clock, 
 } from "lucide-react";
 
-
 import DashboardView from "@/components/views/DashboardView";
 import BookingsView from "@/components/views/BookingsView";
 import AddTableView from "@/components/views/AddTableView";
@@ -28,8 +30,6 @@ import PopularTimesView from "@/components/views/PopularTimesView";
 import TableUsageView from "@/components/views/TableUsageView";
 import SettingsView from "@/components/views/SettingsView";
 
-
-// Define the shape of a booking object (keep here for state typing)
 interface Booking {
   id: string;
   name: string;
@@ -42,21 +42,16 @@ interface Booking {
   table: string;
 }
 
-
-// Define the types for the views
 type ViewType = "dashboard" | "bookings" | "Add Table" | "popularTimes" | "tableUsage" | "settings";
 
-// Main Dashboard Component
-export default function Dashboard({ mockBookings }: { mockBookings: Booking[] }) { // Use the Booking type
-  // --- State variables remain the same ---
-  const [isAuthenticated, setIsAuthenticated] = useState(true); // Assume logged in for now, remove login logic or keep as is
+export default function Dashboard({ mockBookings }: { mockBookings: Booking[] }) {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [currentView, setCurrentView] = useState<ViewType>("dashboard");
-  const [bookings, setBookings] = useState<Booking[]>( // Use the Booking type
+  const [bookings, setBookings] = useState<Booking[]>(
     [...mockBookings].sort((a, b) => {
-      // Sort logic remains the same
       const [aHour, aMinute] = a.time.split(":").map(Number);
       const [bHour, bMinute] = b.time.split(":").map(Number);
       const aDate = new Date(a.date);
@@ -68,8 +63,22 @@ export default function Dashboard({ mockBookings }: { mockBookings: Booking[] })
   );
   const { toast } = useToast();
 
-  // --- Handlers remain the same ---
-  // handleLogin logic... (keep or remove based on auth flow)
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (username === "admin" && password === "password") {
+      setIsAuthenticated(true);
+      toast({
+        title: "Login successful",
+        description: "Welcome to the admin dashboard",
+      });
+    } else {
+      toast({
+        title: "Login failed",
+        description: "Invalid username or password",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleStatusChange = async (bookingId: string, newStatus: "CONFIRMED" | "REJECTED" | "PENDING") => {
     try {
@@ -81,7 +90,6 @@ export default function Dashboard({ mockBookings }: { mockBookings: Booking[] })
           booking.id === bookingId ? { ...booking, status: newStatus } : booking,
         );
 
-        // Re-sort after status change
         const sortedBookings = [...updatedBookings].sort((a, b) => {
              const [aHour, aMinute] = a.time.split(":").map(Number);
              const [bHour, bMinute] = b.time.split(":").map(Number);
@@ -118,11 +126,9 @@ export default function Dashboard({ mockBookings }: { mockBookings: Booking[] })
   const formatDate = (dateStr: string): string => {
     try {
         const date = new Date(dateStr);
-         // Add time zone offset to treat date string as local
          const offset = date.getTimezoneOffset() * 60000;
          const localDate = new Date(date.getTime() + offset);
-        return localDate.toLocaleDateString("en-GB", { // Use en-GB for DD/MM/YYYY or en-US for MM/DD/YYYY
-          // weekday: "short",
+        return localDate.toLocaleDateString("en-GB", {
           day: "2-digit",
           month: "short",
           year: "numeric",
@@ -132,7 +138,6 @@ export default function Dashboard({ mockBookings }: { mockBookings: Booking[] })
         return "Invalid Date";
     }
   };
-
 
   const getStatusBadge = (status: string): React.ReactElement<typeof Badge> => {
     switch (status) {
@@ -162,17 +167,60 @@ export default function Dashboard({ mockBookings }: { mockBookings: Booking[] })
       setSelectedDate(date);
   }
 
-  // --- Remove generatePopularTimesData and generateTableUsageData (moved to views) ---
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-muted">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <Link href="/" className="text-sm text-muted-foreground hover:text-primary flex items-center gap-1">
+                <ArrowLeft className="h-4 w-4" /> Back to Website
+              </Link>
+            </div>
+            <CardTitle className="text-2xl font-playfair text-center mt-4">ZenFlow Admin</CardTitle>
+            <CardDescription className="text-center">Login to manage reservations</CardDescription>
+          </CardHeader>
+          <form onSubmit={handleLogin}>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="username">Username</Label>
+                <Input 
+                  id="username" 
+                  value={username} 
+                  onChange={(e) => setUsername(e.target.value)} 
+                  required 
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button type="submit" className="w-full bg-secondary hover:bg-secondary/90 text-primary">
+                Login
+              </Button>
+            </CardFooter>
+          </form>
+          <div className="px-6 pb-6">
+            <p className="text-xs text-center text-muted-foreground mt-4">
+              For demo purposes, use username: <span className="font-semibold">admin</span> and password:{" "}
+              <span className="font-semibold">password</span>
+            </p>
+          </div>
+        </Card>
+      </div>
+    )
+  }
 
-   // Login rendering logic (keep or remove based on auth flow)
-   if (!isAuthenticated) {
-     // return ( ... login JSX ... );
-     // For now, let's skip the login screen to focus on the main layout
-   }
-
-  // --- Main Render ---
   return (
-    <div className="min-h-screen bg-muted/40"> {/* Adjusted background */}
+    <div className="min-h-screen bg-muted/40">
       <header className="bg-primary text-primary-foreground py-4 sticky top-0 z-10 shadow-sm">
         <div className="container mx-auto flex justify-between items-center px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2">
@@ -181,20 +229,18 @@ export default function Dashboard({ mockBookings }: { mockBookings: Booking[] })
             </Link>
             <span className="text-xs sm:text-sm bg-secondary/20 px-2 py-0.5 rounded">Admin</span>
           </div>
-          {/* Add logout logic if needed */}
-          {/* <Button
+          <Button
             variant="ghost"
             onClick={() => setIsAuthenticated(false)}
             className="text-primary-foreground hover:bg-primary/80 hover:text-primary-foreground"
           >
             Logout
-          </Button> */}
+          </Button> 
         </div>
       </header>
 
       <div className="flex">
-        {/* Sidebar */}
-        <aside className="w-64 min-h-[calc(100vh-64px)] bg-card border-r fixed top-[64px] left-0 h-full"> {/* Fixed position sidebar */}
+        <aside className="w-64 min-h-[calc(100vh-64px)] bg-card border-r fixed top-[64px] left-0 h-full">
           <div className="p-4">
              <h2 className="text-lg font-semibold mb-4 px-2">Management</h2>
              <nav className="space-y-1">
@@ -258,9 +304,7 @@ export default function Dashboard({ mockBookings }: { mockBookings: Booking[] })
           </div>
         </aside>
 
-        {/* Main Content Area */}
-         <main className="flex-1 p-6 sm:p-8 ml-64 mt-[64px]"> {/* Add margin-left to offset fixed sidebar */}
-          {/* --- Conditional Rendering of Views --- */}
+         <main className="flex-1 p-6 sm:p-8 ml-64 mt-[64px]">
           {currentView === "dashboard" && (
             <DashboardView
               bookings={bookings}
@@ -270,7 +314,7 @@ export default function Dashboard({ mockBookings }: { mockBookings: Booking[] })
             />
           )}
 
-          {currentView === "bookings" && selectedDate && ( // Ensure selectedDate is not undefined
+          {currentView === "bookings" && selectedDate && (
             <BookingsView
                bookings={bookings}
                selectedDate={selectedDate}
@@ -284,7 +328,7 @@ export default function Dashboard({ mockBookings }: { mockBookings: Booking[] })
           )}
 
           {currentView === "Add Table" && (
-            <AddTableView /> // Pass props if AddTableView needs them later
+            <AddTableView />
           )}
 
           {currentView === "popularTimes" && (
@@ -296,7 +340,7 @@ export default function Dashboard({ mockBookings }: { mockBookings: Booking[] })
           )}
 
           {currentView === "settings" && (
-            <SettingsView /> // Pass props if SettingsView needs them later
+            <SettingsView />
           )}
         </main>
       </div>
