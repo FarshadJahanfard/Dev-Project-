@@ -11,7 +11,7 @@ import type { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
 
-// Define the structure of a booking object
+// The structure of a booking object
 interface Booking {
   id: string;
   name: string;

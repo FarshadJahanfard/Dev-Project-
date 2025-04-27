@@ -1,52 +1,73 @@
 "use client";
+
 import type React from "react";
+import { useToast } from "@/components/ui/use-toast";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast"; 
 
 interface AddTableViewProps {
-   
-    onAddTable?: (tableData: {
-        tableNumber: string;
-        capacity: number;
-        location: string;
-        isActive: boolean;
-    }) => void;
+  onAddTable?: (tableData: {
+    tableNumber: string;
+    capacity: number;
+    location: string;
+    isActive: boolean;
+  }) => void;
 }
 
 const AddTableView: React.FC<AddTableViewProps> = (props) => {
-  const { toast } = useToast(); 
+  const { toast } = useToast();
 
-  const handleAddTableSubmit = (e: React.FormEvent) => {
+  const handleAddTableSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const formData = new FormData(e.target as HTMLFormElement);
+    console.log('Your Table Was Added Successfully!');
+    const form = e.target as HTMLFormElement;
+    const formData = new FormData(form);
     const tableNumber = formData.get("tableNumber") as string;
     const capacity = formData.get("capacity") as string;
     const location = formData.get("location") as string;
     const isActive = formData.get("isActive") as string;
 
-    // Validate user inputs
     if (!tableNumber?.trim() || !capacity?.trim() || !location?.trim() || !isActive?.trim()) {
-       toast({
-         title: "Error",
-         description: "All fields are required.",
-         variant: "destructive",
-       });
-       return;
-     }
+      toast({
+        title: "Error",
+        description: "All fields are required.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-   //add api call here
-    console.log("Adding table:", { tableNumber, capacity, location, isActive });
+    const newTable = {
+      tableNumber,
+      capacity: Number(capacity),
+      location,
+      isActive: isActive.toLowerCase() === "yes" ? 1 : 0,
+    };
 
-    toast({
-      title: "Table Added",
-      description: `Table "${tableNumber}" (Capacity: ${capacity}) has been added.`, 
+    const res = await fetch('http://localhost:3000/api/tables', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newTable),
     });
+    
 
+    if (res.ok) {
+      toast({
+        title: "Table Added",
+        description: `Table "${tableNumber}" (Capacity: ${capacity}) has been added.`,
+      });
+      form.reset();
+    } else {
+      toast({
+        title: "Error",
+        description: "Failed to add the table. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
-
 
   return (
     <div className="space-y-6">
@@ -82,19 +103,18 @@ const AddTableView: React.FC<AddTableViewProps> = (props) => {
                 name="isActive"
                 className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 required
-                defaultValue="No"
+                defaultValue="Yes"
               >
-                <option value="" disabled>Select status</option>
                 <option value="yes">Yes</option>
                 <option value="no">No</option>
               </select>
             </div>
           </CardContent>
-           <CardFooter>
-             <Button type="submit" className="w-full bg-secondary hover:bg-secondary/90 text-primary">
-               Add Table
-             </Button>
-           </CardFooter>
+          <CardFooter>
+            <Button type="submit" className="w-full bg-secondary hover:bg-secondary/90 text-primary">
+              Add Table
+            </Button>
+          </CardFooter>
         </form>
       </Card>
     </div>

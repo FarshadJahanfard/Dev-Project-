@@ -116,8 +116,8 @@ export default function Home() {
   const data = {
     name: formData.get("name"),
     email: formData.get("email"),
-    date: formattedDate, // keep it simple for the separate field
-    time: formattedTime, // now it’s full datetime format
+    date: formattedDate, 
+    time: formattedTime, 
     guests: Number(formData.get("guests")),
     notes: formData.get("notes"),
   };
