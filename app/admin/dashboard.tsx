@@ -22,13 +22,15 @@ import {
   Settings,
   Clock, 
 } from "lucide-react";
-
 import DashboardView from "@/components/views/DashboardView";
 import BookingsView from "@/components/views/BookingsView";
 import AddTableView from "@/components/views/AddTableView";
 import PopularTimesView from "@/components/views/PopularTimesView";
 import TableUsageView from "@/components/views/TableUsageView";
 import SettingsView from "@/components/views/SettingsView";
+import { useRouter } from 'next/navigation'
+import Draggable from 'react-draggable'
+
 
 interface Booking {
   id: string;
@@ -42,16 +44,16 @@ interface Booking {
   table: string;
 }
 
-type ViewType = "dashboard" | "bookings" | "Add Table" | "popularTimes" | "tableUsage" | "settings";
+type ViewType = "dashboard" | "bookings" | "Add Table" | "popularTimes" | "tableUsage" | "settings" | "floorPlan";
 
-export default function Dashboard({ mockBookings }: { mockBookings: Booking[] }) {
+export default function Dashboard({ nBookings }: { nBookings: Booking[] }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [currentView, setCurrentView] = useState<ViewType>("dashboard");
   const [bookings, setBookings] = useState<Booking[]>(
-    [...mockBookings].sort((a, b) => {
+    [...nBookings].sort((a, b) => {
       const [aHour, aMinute] = a.time.split(":").map(Number);
       const [bHour, bMinute] = b.time.split(":").map(Number);
       const aDate = new Date(a.date);
@@ -62,6 +64,7 @@ export default function Dashboard({ mockBookings }: { mockBookings: Booking[] })
     }),
   );
   const { toast } = useToast();
+  const router = useRouter()
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,7 +86,7 @@ export default function Dashboard({ mockBookings }: { mockBookings: Booking[] })
   const handleStatusChange = async (bookingId: string, newStatus: "CONFIRMED" | "REJECTED" | "PENDING") => {
     try {
       console.log("Handle status change for booking:", bookingId, "to status:", newStatus);
-      const result = await updateBookingStatus(bookingId, newStatus);
+      const result: { success: boolean; error?: string } = await updateBookingStatus(bookingId, newStatus.toLowerCase() as "confirmed" | "rejected" | "pending");
 
       if (result.success) {
         const updatedBookings = bookings.map((booking) =>
@@ -210,8 +213,6 @@ export default function Dashboard({ mockBookings }: { mockBookings: Booking[] })
           </form>
           <div className="px-6 pb-6">
             <p className="text-xs text-center text-muted-foreground mt-4">
-              For demo purposes, use username: <span className="font-semibold">admin</span> and password:{" "}
-              <span className="font-semibold">password</span>
             </p>
           </div>
         </Card>
@@ -268,6 +269,17 @@ export default function Dashboard({ mockBookings }: { mockBookings: Booking[] })
                    <Plus className="mr-2 h-4 w-4" />
                    Add Table
                </Button>
+               <Button
+                variant={currentView === "floorPlan" ? "secondary" : "ghost"}
+                className="w-full justify-start"
+                onClick={() => {
+                  setCurrentView("floorPlan")   // highlight it in your sidebar
+                  router.push("/admin/floor-plan") // actually navigate there
+                }}
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Floor Plan
+              </Button>
             </nav>
 
              <h2 className="text-lg font-semibold mt-6 mb-4 px-2">Analytics</h2>

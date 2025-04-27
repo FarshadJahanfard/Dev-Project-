@@ -13,7 +13,7 @@ export default async function Page() {
     const bookings = await getBookings();
     console.log(bookings);
     return (
-    <Dashboard mockBookings={bookings.reservations}/>
+    <Dashboard nBookings={bookings.reservations}/>
   )
 }
 

@@ -13,6 +13,8 @@ interface AddTableViewProps {
     capacity: number;
     location: string;
     isActive: boolean;
+    x: number;
+    y: number;
   }) => void;
 }
 
@@ -28,8 +30,10 @@ const AddTableView: React.FC<AddTableViewProps> = (props) => {
     const capacity = formData.get("capacity") as string;
     const location = formData.get("location") as string;
     const isActive = formData.get("isActive") as string;
+    const x = formData.get("x") as string; 
+    const y = formData.get("y") as string; 
 
-    if (!tableNumber?.trim() || !capacity?.trim() || !location?.trim() || !isActive?.trim()) {
+    if (!tableNumber?.trim() || !capacity?.trim() || !location?.trim() || !isActive?.trim() || !x?.trim() || !y?.trim()) {
       toast({
         title: "Error",
         description: "All fields are required.",
@@ -42,6 +46,8 @@ const AddTableView: React.FC<AddTableViewProps> = (props) => {
       tableNumber,
       capacity: Number(capacity),
       location,
+      x: Number(x),
+      y: Number(y), 
       isActive: isActive.toLowerCase() === "yes" ? 1 : 0,
     };
 
@@ -52,7 +58,6 @@ const AddTableView: React.FC<AddTableViewProps> = (props) => {
       },
       body: JSON.stringify(newTable),
     });
-    
 
     if (res.ok) {
       toast({
@@ -85,17 +90,27 @@ const AddTableView: React.FC<AddTableViewProps> = (props) => {
         <form onSubmit={handleAddTableSubmit}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="tableNumber">Table Number/Name</Label>
-              <Input id="tableNumber" name="tableNumber" placeholder="e.g., T1, Patio 5, Booth 2" required />
+              <Label htmlFor="tableNumber">Table Number</Label>
+              <Input id="tableNumber" name="tableNumber" placeholder="T-1" required />
             </div>
             <div className="space-y-2">
               <Label htmlFor="capacity">Capacity</Label>
               <Input id="capacity" name="capacity" type="number" min="1" placeholder="Enter table capacity" required />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="location">Location</Label>
+              <Label htmlFor="location">Location (Area Name)</Label>
               <Input id="location" name="location" placeholder="Upstairs Cafe, Main Dining, VIP Room, Bar Area" required />
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="x">X Position (pixels)</Label>
+              <Input id="x" name="x" type="number" placeholder="e.g., 100" required />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="y">Y Position (pixels)</Label>
+              <Input id="y" name="y" type="number" placeholder="e.g., 250" required />
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="isActive">Is Active</Label>
               <select
