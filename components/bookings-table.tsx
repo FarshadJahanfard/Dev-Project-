@@ -4,62 +4,14 @@ import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Check, X } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { updateBookingStatus } from "@/app/actions"
+import { updateBookingStatus } from "@/app/action"
 import { useToast } from "@/components/ui/use-toast"
 import { useState } from "react"
 import type { Booking } from "@/lib/types"
 
-const bookings: Booking[] = [
-  {
-    id: "1",
-    name: "John Smith",
-    email: "john@example.com",
-    date: "2024-02-12",
-    time: "19:00",
-    guests: 4,
-    status: "pending",
-  },
-  {
-    id: "2",
-    name: "Sarah Johnson",
-    email: "sarah@example.com",
-    date: "2024-02-12",
-    time: "20:00",
-    guests: 2,
-    status: "pending",
-  },
-  {
-    id: "3",
-    name: "Michael Brown",
-    email: "michael@example.com",
-    date: "2024-02-13",
-    time: "18:30",
-    guests: 6,
-    status: "pending",
-  },
-  {
-    id: "4",
-    name: "Emily Davis",
-    email: "emily@example.com",
-    date: "2024-02-13",
-    time: "19:30",
-    guests: 3,
-    status: "pending",
-  },
-  {
-    id: "5",
-    name: "David Wilson",
-    email: "david@example.com",
-    date: "2024-02-14",
-    time: "20:00",
-    guests: 2,
-    status: "pending",
-  },
-]
-
 export function BookingsTable() {
   const { toast } = useToast()
-  const [localBookings, setLocalBookings] = useState(bookings)
+  const [localBookings, setLocalBookings] = useState()
   const [processing, setProcessing] = useState<string | null>(null)
 
   async function handleStatusUpdate(bookingId: string, newStatus: "confirmed" | "rejected") {

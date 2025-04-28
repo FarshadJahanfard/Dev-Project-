@@ -1,7 +1,7 @@
 "use client"
 
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "@/components/ui/chart"
-
+// dummy data for the chart
 const data = [
   {
     name: "Mon",
