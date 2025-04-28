@@ -273,8 +273,8 @@ export default function Dashboard({ nBookings }: { nBookings: Booking[] }) {
                 variant={currentView === "floorPlan" ? "secondary" : "ghost"}
                 className="w-full justify-start"
                 onClick={() => {
-                  setCurrentView("floorPlan")   // highlight it in your sidebar
-                  router.push("/admin/floor-plan") // actually navigate there
+                  setCurrentView("floorPlan")   
+                  router.push("/admin/floor-plan") 
                 }}
               >
                 <Plus className="mr-2 h-4 w-4" />
