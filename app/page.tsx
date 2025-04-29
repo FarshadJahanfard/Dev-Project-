@@ -14,6 +14,7 @@ import { useState } from "react"
 import { Textarea } from "@/components/ui/textarea"
 
 
+
 export default function Home() {
   const [date, setDate] = useState<Date>();
   return (
@@ -214,9 +215,9 @@ export default function Home() {
                             selected={date}
                             onSelect={setDate}
                             initialFocus
-                            disabled={(date) => { 
+                            disabled={(date) => {
                               const today = new Date();
-                              today.setHours(0, 0, 0, 0); 
+                              today.setHours(0, 0, 0, 0);
                               return date < today;
                             }}
                           />
@@ -237,17 +238,45 @@ export default function Home() {
                           <SelectValue placeholder="Select time" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="10:30">10:30 AM</SelectItem>
-                          <SelectItem value="11:30">11:30 AM</SelectItem>
-                          <SelectItem value="12:30">12:30 PM</SelectItem>
-                          <SelectItem value="13:30">1:30 PM</SelectItem>
-                          <SelectItem value="14:30">2:30 PM</SelectItem>
-                          <SelectItem value="15:30">3:30 PM</SelectItem>
-                          <SelectItem value="16:30">4:30 PM</SelectItem>
-                          <SelectItem value="17:30">5:30 PM</SelectItem>
-                          <SelectItem value="18:30">6:30 PM</SelectItem>
-                          <SelectItem value="19:30">7:30 PM</SelectItem>
-                          <SelectItem value="20:30">8:30 PM</SelectItem>
+                          {(() => {
+                            const now = new Date();
+                            const nowMinutes =
+                              now.getHours() * 60 + now.getMinutes(); // get local time in hours and minutes
+
+                            const openingTime = 10 * 60 + 30; // 10:30 AM
+                            const closingTime = 20 * 60 + 30; //  8:30 PM
+
+                            const slots = [];
+                            for (
+                              let mins = openingTime;
+                              mins <= closingTime;
+                              mins += 30
+                            ) {
+                              const hour24 = Math.floor(mins / 60);
+                              const minute = mins % 60;
+                              const hour12 =
+                                hour24 % 12 === 0 ? 12 : hour24 % 12;
+                              const ampm = hour24 < 12 ? "AM" : "PM";
+
+                              // Format hour and minute to two digits
+                              const mm = ("0" + minute).slice(-2);
+
+                              const value = `${hour24}:${mm}`; // "HH:mm"
+                              const label = `${hour12}:${mm} ${ampm}`; // "hh:mm AM/PM"
+                              // Disable slots that are in the past
+                              slots.push(
+                                <SelectItem
+                                  key={value}
+                                  value={value}
+                                  disabled={nowMinutes > mins} // greys out the option
+                                >
+                                  {label}
+                                </SelectItem>
+                              );
+                            }
+
+                            return slots;
+                          })()}
                         </SelectContent>
                       </Select>
                     </div>
