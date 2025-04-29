@@ -290,7 +290,7 @@ export default function Dashboard({ nBookings }: { nBookings: Booking[] }) {
                 onClick={() => setCurrentView("popularTimes")}
               >
                 <BarChart3 className="mr-2 h-4 w-4" />
-                Popular Times
+                Bookings Analytics 
               </Button>
               <Button
                 variant={currentView === "tableUsage" ? "secondary" : "ghost"}
