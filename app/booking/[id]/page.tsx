@@ -13,14 +13,13 @@ const CONNECTION_PARAMS = {
 
 export default async function Booking({params}: {params: {id: string}}) {
     const booking_id = params.id;
-    console.log('Booking ID:', booking_id);
+    console.log('Booking ID:', booking_id); 
     const connection = await mysql.createConnection(CONNECTION_PARAMS); // Create a connection to the database
             
     const [bookings] = await connection.query<any>('SELECT booking_date, booking_time, guests, CUSTOMERS.name FROM BOOKINGS INNER JOIN CUSTOMERS ON BOOKINGS.customer_id=CUSTOMERS.customer_id AND BOOKINGS.booking_id=?', [params.id]);
     console.log('Booking:', bookings[0]);
     connection.end();
     const booking = bookings[0];
-
 
     return (
         <div
@@ -192,7 +191,7 @@ export default async function Booking({params}: {params: {id: string}}) {
               href={`mailto:${COMPANY_EMAIL}`}
               style={{ color: '#3182ce', textDecoration: 'none' }}
             >
-              email
+              Email
             </a>
           </p>
           <p style={{ marginTop: '10px' }}>
