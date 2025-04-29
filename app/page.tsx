@@ -1,22 +1,69 @@
 "use client";
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { CalendarIcon, Clock, MapPin, Phone } from "lucide-react"
-import Link from "next/link"
-import Image from "next/image"
-import { Label } from "@/components/ui/label"
-import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { format } from "date-fns"
-import { useState } from "react"
-import { Textarea } from "@/components/ui/textarea"
-
-
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CalendarIcon, Clock, MapPin, Phone } from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
+import { Label } from "@/components/ui/label";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
+import { useState } from "react";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function Home() {
-  const [date, setDate] = useState<Date>();
+  const [chosenDate, setChosenDate] = useState<Date>();
+
+  const isPastDate = (dateToCheck) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return dateToCheck < today;
+  };
+
+  const getSelectableTimes = () => {
+    const now = new Date();
+    const nowMins = now.getHours() * 60 + now.getMinutes();
+    const todayStr = now.toDateString();
+    const tomorrow = new Date();
+    tomorrow.setDate(now.getDate() + 1);
+    const tomorrowStr = tomorrow.toDateString();
+    const tenAmMins = 10 * 60;
+    const openTimeMins = 10 * 60 + 30; // 10:30 AM
+    const closeTimeMins = 20 * 60 + 30; // 8:30 PM
+    const slots = [];
+
+    for (let mins = openTimeMins; mins <= closeTimeMins; mins += 30) {
+      const hour24 = Math.floor(mins / 60);
+      const minute = mins % 60;
+      const hour12 = hour24 % 12 === 0 ? 12 : hour24 % 12;
+      const ampm = hour24 < 12 ? "AM" : "PM";
+      const timeVal = `${hour24}:${String(minute).padStart(2, '0')}`;
+      const timeLabel = `${hour12}:${String(minute).padStart(2, '0')} ${ampm}`;
+      const slotDateTime = new Date();
+      slotDateTime.setHours(hour24, minute, 0, 0);
+
+      let disabled = false;
+
+      if (chosenDate) {
+        const chosenDateStr = chosenDate.toDateString();
+        if (chosenDateStr === todayStr && slotDateTime < now) {
+          disabled = true;
+        } else if (chosenDateStr === tomorrowStr && mins < tenAmMins) {
+          disabled = true;
+        }
+      }
+
+      slots.push(
+        <SelectItem key={timeVal} value={timeVal} disabled={disabled}>
+          {timeLabel}
+        </SelectItem>
+      );
+    }
+    return slots;
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <header className="absolute top-0 left-0 right-0 z-50">
@@ -75,8 +122,8 @@ export default function Home() {
               document
                 .getElementById("reservation-form")
                 ?.scrollIntoView({ behavior: "smooth" })
-            }
-          >
+              }
+            >
             Make a Reservation
           </Button>
         </div>
@@ -128,13 +175,13 @@ export default function Home() {
                   onSubmit={async (e) => {
                     e.preventDefault();
                     const formData = new FormData(e.currentTarget);
-                    date?.setHours(1);
-                    const formattedDate = date?.toISOString().split("T")[0];
-                    console.log("date", date);
+                    chosenDate?.setHours(1);
+                    const formattedDate = chosenDate?.toISOString().split("T")[0];
+                    console.log("date", chosenDate);
                     console.log("formattedDate", formattedDate);
-                    const time = formData.get("time"); // "HH:mm"
-                    const formattedTime = `${formattedDate} ${time}:00`; // "YYYY-MM-DD HH:mm:ss"
-                    const data = {
+                    const time = formData.get("time");
+                    const formattedTime = `${formattedDate} ${time}:00`;
+                    const reservationData = {
                       name: formData.get("name"),
                       email: formData.get("email"),
                       date: formattedDate,
@@ -149,21 +196,21 @@ export default function Home() {
                         headers: {
                           "Content-Type": "application/json",
                         },
-                        body: JSON.stringify(data),
+                        body: JSON.stringify(reservationData),
                       });
 
                       if (!response.ok) {
-                        throw new Error("Failed to submit reservation");
+                        throw new Error("Failed to submit booking");
                       }
 
-                      const respJSON = await response.json();
-                      const reservationID = respJSON.reservation.booking_id;
+                      const responseJson = await response.json();
+                      const bookingId = responseJson.reservation.booking_id;
 
-                      window.location.href = `/booking/${reservationID}`;
+                      window.location.href = `/booking/${bookingId}`;
                     } catch (error) {
                       console.error(error);
                       alert(
-                        "An error occurred while submitting your reservation."
+                        "Something went wrong with your reservation request."
                       );
                     }
                   }}
@@ -174,7 +221,7 @@ export default function Home() {
                       <Input
                         id="name"
                         name="name"
-                        placeholder="Enter your name"
+                        placeholder="Your name"
                         className="border-secondary/20"
                         required
                         aria-required="true"
@@ -185,7 +232,7 @@ export default function Home() {
                       <Input
                         id="email"
                         name="email"
-                        placeholder="Enter your email"
+                        placeholder="Your email"
                         type="email"
                         className="border-secondary/20"
                         required
@@ -202,30 +249,26 @@ export default function Home() {
                             id="date"
                             variant="outline"
                             className={`w-full justify-start text-left font-normal border-secondary/20 ${
-                              !date ? "border-red-500" : ""
+                              !chosenDate ? "border-red-500" : ""
                             }`}
                           >
                             <CalendarIcon className="mr-2 h-4 w-4" />
-                            {date ? format(date, "PPP") : "Pick a date"}
+                            {chosenDate ? format(chosenDate, "PPP") : "Pick a date"}
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0" align="start">
                           <Calendar
                             mode="single"
-                            selected={date}
-                            onSelect={setDate}
+                            selected={chosenDate}
+                            onSelect={setChosenDate}
                             initialFocus
-                            disabled={(date) => {
-                              const today = new Date();
-                              today.setHours(0, 0, 0, 0);
-                              return date < today;
-                            }}
+                            disabled={isPastDate}
                           />
                         </PopoverContent>
                       </Popover>
-                      {!date && (
+                      {!chosenDate && (
                         <p className="text-sm text-red-500">
-                          Please select a date.
+                          Please choose a date.
                         </p>
                       )}
                     </div>
@@ -238,45 +281,7 @@ export default function Home() {
                           <SelectValue placeholder="Select time" />
                         </SelectTrigger>
                         <SelectContent>
-                          {(() => {
-                            const now = new Date();
-                            const nowMinutes =
-                              now.getHours() * 60 + now.getMinutes(); // get local time in hours and minutes
-
-                            const openingTime = 10 * 60 + 30; // 10:30 AM
-                            const closingTime = 20 * 60 + 30; //  8:30 PM
-
-                            const slots = [];
-                            for (
-                              let mins = openingTime;
-                              mins <= closingTime;
-                              mins += 30
-                            ) {
-                              const hour24 = Math.floor(mins / 60);
-                              const minute = mins % 60;
-                              const hour12 =
-                                hour24 % 12 === 0 ? 12 : hour24 % 12;
-                              const ampm = hour24 < 12 ? "AM" : "PM";
-
-                              // Format hour and minute to two digits
-                              const mm = ("0" + minute).slice(-2);
-
-                              const value = `${hour24}:${mm}`; // "HH:mm"
-                              const label = `${hour12}:${mm} ${ampm}`; // "hh:mm AM/PM"
-                              // Disable slots that are in the past
-                              slots.push(
-                                <SelectItem
-                                  key={value}
-                                  value={value}
-                                  disabled={nowMinutes > mins} // greys out the option
-                                >
-                                  {label}
-                                </SelectItem>
-                              );
-                            }
-
-                            return slots;
-                          })()}
+                          {getSelectableTimes()}
                         </SelectContent>
                       </Select>
                     </div>
@@ -288,7 +293,7 @@ export default function Home() {
                         className="border-secondary/20"
                         aria-required="true"
                       >
-                        <SelectValue placeholder="Select number of guests" />
+                        <SelectValue placeholder="How many people?" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="1">1 Guest</SelectItem>
@@ -305,8 +310,8 @@ export default function Home() {
                       Special Requests
                     </Label>
                     <p className="text-sm text-muted-foreground mb-2">
-                      Let us know if you have any dietary requirements or
-                      special preferences.
+                    Let us know if you have any dietary requirements or
+                    special preferences.
                     </p>
                     <Textarea
                       id="notes"
@@ -350,9 +355,9 @@ export default function Home() {
             <div>
               <h3 className="font-playfair text-xl mb-4">Opening Hours</h3>
               <p className="text-primary-foreground/80">
-                Monday - Sunday
+                Every day
                 <br />
-                10:30 AM - 10:00 PM (at Newmillerdam branch)
+                10:30 AM - 10:00 PM
               </p>
             </div>
             <div>
@@ -362,7 +367,7 @@ export default function Home() {
                 <br />
                 Wakefield | WF2 6QQ
                 <br />
-                +44 1924 465000
+                Call us at +44 1924 465000
               </p>
             </div>
           </div>
