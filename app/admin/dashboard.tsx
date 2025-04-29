@@ -20,7 +20,8 @@ import {
   Utensils,
   Plus, 
   Settings,
-  Clock, 
+  Clock,
+  MapPin,
 } from "lucide-react";
 import DashboardView from "@/components/views/DashboardView";
 import BookingsView from "@/components/views/BookingsView";
@@ -29,7 +30,7 @@ import PopularTimesView from "@/components/views/PopularTimesView";
 import TableUsageView from "@/components/views/TableUsageView";
 import SettingsView from "@/components/views/SettingsView";
 import { useRouter } from 'next/navigation'
-import Draggable from 'react-draggable'
+
 
 
 interface Booking {
@@ -269,17 +270,17 @@ export default function Dashboard({ nBookings }: { nBookings: Booking[] }) {
                    <Plus className="mr-2 h-4 w-4" />
                    Add Table
                </Button>
-               <Button
+                 <Button
                 variant={currentView === "floorPlan" ? "secondary" : "ghost"}
                 className="w-full justify-start"
                 onClick={() => {
-                  setCurrentView("floorPlan")   
-                  router.push("/admin/floor-plan") 
+                  setCurrentView("floorPlan")
+                router.push("/admin/floor-plan")
                 }}
-              >
-                <Plus className="mr-2 h-4 w-4" />
+                >
+                <MapPin className="mr-2 h-4 w-4" />
                 Floor Plan
-              </Button>
+                </Button>
             </nav>
 
              <h2 className="text-lg font-semibold mt-6 mb-4 px-2">Analytics</h2>
