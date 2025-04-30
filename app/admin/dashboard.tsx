@@ -8,17 +8,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { format, addDays, subDays, isSameDay } from "date-fns";
 import Link from "next/link";
-import { updateBookingStatus } from "../action"; 
+import { updateBookingStatus } from "../action";
 import { useToast } from "@/components/ui/use-toast";
 import {
-  Check, 
+  Check,
   X,
-  ArrowLeft, 
-  Calendar, 
-  LayoutDashboard, 
-  BarChart3, 
+  ArrowLeft,
+  Calendar,
+  LayoutDashboard,
+  BarChart3,
   Utensils,
-  Plus, 
+  Plus,
   Settings,
   Clock,
   MapPin,
@@ -29,9 +29,8 @@ import AddTableView from "@/components/views/AddTableView";
 import PopularTimesView from "@/components/views/PopularTimesView";
 import TableUsageView from "@/components/views/TableUsageView";
 import SettingsView from "@/components/views/SettingsView";
-import { useRouter } from 'next/navigation'
-
-
+import { useRouter } from 'next/navigation';
+import { Roboto } from 'next/font/google'; 
 
 interface Booking {
   id: string;
@@ -46,6 +45,11 @@ interface Booking {
 }
 
 type ViewType = "dashboard" | "bookings" | "Add Table" | "popularTimes" | "tableUsage" | "settings" | "floorPlan";
+
+const roboto = Roboto({
+  subsets: ['latin'],
+  weight: ['400', '500', '700'], 
+});
 
 export default function Dashboard({ nBookings }: { nBookings: Booking[] }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -65,7 +69,7 @@ export default function Dashboard({ nBookings }: { nBookings: Booking[] }) {
     }),
   );
   const { toast } = useToast();
-  const router = useRouter()
+  const router = useRouter();
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,13 +99,13 @@ export default function Dashboard({ nBookings }: { nBookings: Booking[] }) {
         );
 
         const sortedBookings = [...updatedBookings].sort((a, b) => {
-             const [aHour, aMinute] = a.time.split(":").map(Number);
-             const [bHour, bMinute] = b.time.split(":").map(Number);
-             const aDate = new Date(a.date);
-             const bDate = new Date(b.date);
-             aDate.setHours(aHour, aMinute, 0);
-             bDate.setHours(bHour, bMinute, 0);
-             return aDate.getTime() - bDate.getTime();
+          const [aHour, aMinute] = a.time.split(":").map(Number);
+          const [bHour, bMinute] = b.time.split(":").map(Number);
+          const aDate = new Date(a.date);
+          const bDate = new Date(b.date);
+          aDate.setHours(aHour, aMinute, 0);
+          bDate.setHours(bHour, bMinute, 0);
+          return aDate.getTime() - bDate.getTime();
         });
 
         setBookings(sortedBookings);
@@ -118,7 +122,7 @@ export default function Dashboard({ nBookings }: { nBookings: Booking[] }) {
         });
       }
     } catch (error) {
-        console.error("Error updating status:", error);
+      console.error("Error updating status:", error);
       toast({
         title: "Error",
         description: "An unexpected error occurred while updating status.",
@@ -129,17 +133,17 @@ export default function Dashboard({ nBookings }: { nBookings: Booking[] }) {
 
   const formatDate = (dateStr: string): string => {
     try {
-        const date = new Date(dateStr);
-         const offset = date.getTimezoneOffset() * 60000;
-         const localDate = new Date(date.getTime() + offset);
-        return localDate.toLocaleDateString("en-GB", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        });
+      const date = new Date(dateStr);
+      const offset = date.getTimezoneOffset() * 60000;
+      const localDate = new Date(date.getTime() + offset);
+      return localDate.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      });
     } catch (e) {
-        console.error("Error formatting date:", dateStr, e);
-        return "Invalid Date";
+      console.error("Error formatting date:", dateStr, e);
+      return "Invalid Date";
     }
   };
 
@@ -168,12 +172,12 @@ export default function Dashboard({ nBookings }: { nBookings: Booking[] }) {
   };
 
   const handleSetSelectedDate = (date: Date | undefined) => {
-      setSelectedDate(date);
+    setSelectedDate(date);
   }
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-muted">
+      <div className={`min-h-screen flex items-center justify-center bg-muted ${roboto.className}`}>
         <Card className="w-full max-w-md">
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -181,18 +185,18 @@ export default function Dashboard({ nBookings }: { nBookings: Booking[] }) {
                 <ArrowLeft className="h-4 w-4" /> Back to Website
               </Link>
             </div>
-            <CardTitle className="text-2xl font-playfair text-center mt-4">ZenFlow Admin</CardTitle>
+            <CardTitle className="text-2xl text-center mt-4">ZenFlow Admin</CardTitle>
             <CardDescription className="text-center">Login to manage reservations</CardDescription>
           </CardHeader>
           <form onSubmit={handleLogin}>
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="username">Username</Label>
-                <Input 
-                  id="username" 
-                  value={username} 
-                  onChange={(e) => setUsername(e.target.value)} 
-                  required 
+                <Input
+                  id="username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
                 />
               </div>
               <div className="space-y-2">
@@ -222,11 +226,11 @@ export default function Dashboard({ nBookings }: { nBookings: Booking[] }) {
   }
 
   return (
-    <div className="min-h-screen bg-muted/40">
-      <header className="bg-primary text-primary-foreground py-4 sticky top-0 z-10 shadow-sm">
+    <div className={`min-h-screen bg-muted/40 ${roboto.className}`}>
+      <header className={`bg-primary text-primary-foreground py-4 sticky top-0 z-10 shadow-sm ${roboto.className}`}>
         <div className="container mx-auto flex justify-between items-center px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2">
-            <Link href="/" className="text-2xl font-playfair font-bold">
+          <Link href="/" className="text-2xl font-bold">
               ZenFlow
             </Link>
             <span className="text-xs sm:text-sm bg-secondary/20 px-2 py-0.5 rounded">Admin</span>
@@ -237,15 +241,15 @@ export default function Dashboard({ nBookings }: { nBookings: Booking[] }) {
             className="text-primary-foreground hover:bg-primary/80 hover:text-primary-foreground"
           >
             Logout
-          </Button> 
+          </Button>
         </div>
       </header>
 
       <div className="flex">
-        <aside className="w-64 min-h-[calc(100vh-64px)] bg-card border-r fixed top-[64px] left-0 h-full">
+        <aside className={`w-64 min-h-[calc(100vh-64px)] bg-card border-r fixed top-[64px] left-0 h-full ${roboto.className}`}>
           <div className="p-4">
-             <h2 className="text-lg font-semibold mb-4 px-2">Management</h2>
-             <nav className="space-y-1">
+            <h2 className="text-lg font-semibold mb-4 px-2">Management</h2>
+            <nav className="space-y-1">
               <Button
                 variant={currentView === "dashboard" ? "secondary" : "ghost"}
                 className="w-full justify-start"
@@ -262,36 +266,36 @@ export default function Dashboard({ nBookings }: { nBookings: Booking[] }) {
                 <Calendar className="mr-2 h-4 w-4" />
                 Bookings
               </Button>
-               <Button
-                   variant={currentView === "Add Table" ? "secondary" : "ghost"}
-                   className="w-full justify-start"
-                   onClick={() => setCurrentView("Add Table")}
-               >
-                   <Plus className="mr-2 h-4 w-4" />
-                   Add Table
-               </Button>
-                 <Button
+              <Button
+                variant={currentView === "Add Table" ? "secondary" : "ghost"}
+                className="w-full justify-start"
+                onClick={() => setCurrentView("Add Table")}
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Add Table
+              </Button>
+              <Button
                 variant={currentView === "floorPlan" ? "secondary" : "ghost"}
                 className="w-full justify-start"
                 onClick={() => {
-                  setCurrentView("floorPlan")
-                router.push("/admin/floor-plan")
+                  setCurrentView("floorPlan");
+                  router.push("/admin/floor-plan");
                 }}
-                >
+              >
                 <MapPin className="mr-2 h-4 w-4" />
                 Floor Plan
-                </Button>
+              </Button>
             </nav>
 
-             <h2 className="text-lg font-semibold mt-6 mb-4 px-2">Analytics</h2>
-             <nav className="space-y-1">
+            <h2 className="text-lg font-semibold mt-6 mb-4 px-2">Analytics</h2>
+            <nav className="space-y-1">
               <Button
                 variant={currentView === "popularTimes" ? "secondary" : "ghost"}
                 className="w-full justify-start"
                 onClick={() => setCurrentView("popularTimes")}
               >
                 <BarChart3 className="mr-2 h-4 w-4" />
-                Bookings Analytics 
+                Bookings Analytics
               </Button>
               <Button
                 variant={currentView === "tableUsage" ? "secondary" : "ghost"}
@@ -303,8 +307,8 @@ export default function Dashboard({ nBookings }: { nBookings: Booking[] }) {
               </Button>
             </nav>
 
-             <h2 className="text-lg font-semibold mt-6 mb-4 px-2">System</h2>
-             <nav className="space-y-1">
+            <h2 className="text-lg font-semibold mt-6 mb-4 px-2">System</h2>
+            <nav className="space-y-1">
               <Button
                 variant={currentView === "settings" ? "secondary" : "ghost"}
                 className="w-full justify-start"
@@ -317,7 +321,7 @@ export default function Dashboard({ nBookings }: { nBookings: Booking[] }) {
           </div>
         </aside>
 
-         <main className="flex-1 p-6 sm:p-8 ml-64 mt-[64px]">
+        <main className={`flex-1 p-6 sm:p-8 ml-64 mt-[64px] ${roboto.className}`}>
           {currentView === "dashboard" && (
             <DashboardView
               bookings={bookings}
@@ -329,14 +333,14 @@ export default function Dashboard({ nBookings }: { nBookings: Booking[] }) {
 
           {currentView === "bookings" && selectedDate && (
             <BookingsView
-               bookings={bookings}
-               selectedDate={selectedDate}
-               onStatusChange={handleStatusChange}
-               formatDate={formatDate}
-               getStatusBadge={getStatusBadge}
-               handlePreviousDay={handlePreviousDay}
-               handleNextDay={handleNextDay}
-               setSelectedDate={handleSetSelectedDate}
+              bookings={bookings}
+              selectedDate={selectedDate}
+              onStatusChange={handleStatusChange}
+              formatDate={formatDate}
+              getStatusBadge={getStatusBadge}
+              handlePreviousDay={handlePreviousDay}
+              handleNextDay={handleNextDay}
+              setSelectedDate={handleSetSelectedDate}
             />
           )}
 

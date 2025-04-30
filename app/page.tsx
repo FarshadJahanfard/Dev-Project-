@@ -12,6 +12,13 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { format } from "date-fns";
 import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
+import { Montserrat, Playfair_Display } from 'next/font/google'; // Import the fonts
+
+// Load the Montserrat font for body text
+const montserrat = Montserrat({ subsets: ['latin'] });
+
+// Load the Playfair Display font for headings
+const playfairDisplay = Playfair_Display({ subsets: ['latin'] });
 
 export default function Home() {
   const [chosenDate, setChosenDate] = useState<Date>();
@@ -65,14 +72,13 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className={`min-h-screen bg-background ${montserrat.className}`}>
       <header className="absolute top-0 left-0 right-0 z-50">
         <div className="container flex h-20 items-center justify-between px-4">
           <div className="flex items-center gap-6">
             <Link
               href="/"
-              className="text-3xl md:text-4xl font-playfair font-bold text-white"
-              style={{ fontFamily: "Playfair Display, serif" }}
+              className={`text-3xl md:text-4xl font-bold text-white ${playfairDisplay.className}`}
             >
               ZenFlow
             </Link>
@@ -109,7 +115,7 @@ export default function Home() {
           />
         </div>
         <div className="relative z-10 text-center text-white px-4 max-w-3xl mx-auto">
-          <h1 className="font-playfair text-4xl md:text-6xl font-bold mb-4">
+          <h1 className={`font-playfair text-4xl md:text-6xl font-bold mb-4 ${playfairDisplay.className}`}>
             Experience Culinary Excellence
           </h1>
           <p className="text-lg md:text-xl text-white/90 mb-8">
@@ -134,14 +140,14 @@ export default function Home() {
             <Card className="bg-card">
               <CardHeader>
                 <Clock className="w-10 h-10 p-2 text-primary bg-secondary/20 rounded-lg mb-4" />
-                <CardTitle className="font-playfair">Opening Hours</CardTitle>
+                <CardTitle className={`font-playfair ${playfairDisplay.className}`}>Opening Hours</CardTitle>
                 <CardDescription>Mon-Sun: 10:30 PM - 10:00 PM</CardDescription>
               </CardHeader>
             </Card>
             <Card className="bg-card">
               <CardHeader>
                 <MapPin className="w-10 h-10 p-2 text-primary bg-secondary/20 rounded-lg mb-4" />
-                <CardTitle className="font-playfair">Location</CardTitle>
+                <CardTitle className={`font-playfair ${playfairDisplay.className}`}>Location</CardTitle>
                 <CardDescription>
                   Newmillerdam Branch, 648 Barnsley Rd, Wakefield
                 </CardDescription>
@@ -150,7 +156,7 @@ export default function Home() {
             <Card className="bg-card">
               <CardHeader>
                 <Phone className="w-10 h-10 p-2 text-primary bg-secondary/20 rounded-lg mb-4" />
-                <CardTitle className="font-playfair">Contact</CardTitle>
+                <CardTitle className={`font-playfair ${playfairDisplay.className}`}>Contact</CardTitle>
                 <CardDescription>+44 1924 465000</CardDescription>
               </CardHeader>
             </Card>
@@ -163,14 +169,14 @@ export default function Home() {
           <div className="max-w-2xl mx-auto">
             <Card className="border-secondary/20">
               <CardHeader className="text-center">
-                <CardTitle className="font-playfair text-3xl">
+                <CardTitle className={`font-playfair text-3xl ${playfairDisplay.className}`}>
                   Make a Reservation
                 </CardTitle>
                 <CardDescription>
                   Book your table for an unforgettable dining experience
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-6 font-sans">
                 <form
                   onSubmit={async (e) => {
                     e.preventDefault();
@@ -217,7 +223,7 @@ export default function Home() {
                 >
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
-                      <Label htmlFor="name">Name</Label>
+                      <Label htmlFor="name" className="font-sans">Name</Label>
                       <Input
                         id="name"
                         name="name"
@@ -310,8 +316,8 @@ export default function Home() {
                       Special Requests
                     </Label>
                     <p className="text-sm text-muted-foreground mb-2">
-                    Let us know if you have any dietary requirements or
-                    special preferences.
+                      Let us know if you have any dietary requirements or
+                      special preferences.
                     </p>
                     <Textarea
                       id="notes"
@@ -345,7 +351,7 @@ export default function Home() {
         <div className="container px-4">
           <div className="grid gap-8 md:grid-cols-3 max-w-5xl mx-auto">
             <div>
-              <h3 className="font-playfair text-xl mb-4">About Us</h3>
+              <h3 className={`font-playfair text-xl mb-4 ${playfairDisplay.className}`}>About Us</h3>
               <p className="text-primary-foreground/80">
                 Capri Group is a chain of bars and restaurants known for
                 exceptional dining and vibrant atmospheres across Wakefield,
@@ -353,7 +359,7 @@ export default function Home() {
               </p>
             </div>
             <div>
-              <h3 className="font-playfair text-xl mb-4">Opening Hours</h3>
+              <h3 className={`font-playfair text-xl mb-4 ${playfairDisplay.className}`}>Opening Hours</h3>
               <p className="text-primary-foreground/80">
                 Every day
                 <br />
@@ -361,7 +367,7 @@ export default function Home() {
               </p>
             </div>
             <div>
-              <h3 className="font-playfair text-xl mb-4">Contact</h3>
+              <h3 className={`font-playfair text-xl mb-4 ${playfairDisplay.className}`}>Contact</h3>
               <p className="text-primary-foreground/80">
                 648 Barnsley Rd, Newmillerdam,
                 <br />
