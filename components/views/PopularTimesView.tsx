@@ -15,18 +15,25 @@ import {
   Tooltip,
   Bar,
 } from "recharts";
+import { format } from 'date-fns';
+
+// Restaurant's opening and closing times
+const openingTimeDecimal = 10.5; 
+const closingTimeDecimal = 21.0; 
+const totalHours = closingTimeDecimal - openingTimeDecimal;
 
 export default function PopularTimesView() {
   const [bookings, setBookings] = useState<any[]>([]);
-  const today = new Date().toISOString().slice(0, 10); // Define today
+  const today = new Date().toISOString().slice(0, 10);
 
   useEffect(() => {
-    fetch("/api/reserve") 
-      .then((res) => res.json()) 
+    fetch("/api/reserve")
+      .then((res) => res.json())
       .then((data) => {
         if (data && data.reservations) {
-          const todayDate = new Date(today); // Create a Date object for today
-          const todaysBookings = data.reservations.filter((b: any) => { // filter bookings for today
+          const todayDate = new Date(today); // create a Date object for today
+          // Filter bookings for today
+          const todaysBookings = data.reservations.filter((b: any) => {
             if (b.booking_date) {
               try {
                 const bookingDate = new Date(b.booking_date);
@@ -47,7 +54,7 @@ export default function PopularTimesView() {
             return false;
           });
           console.log(
-            "Today's bookings:",
+            "Todays bookings:",
             todaysBookings
           );
           setBookings(todaysBookings);
@@ -58,46 +65,55 @@ export default function PopularTimesView() {
       .catch(console.error);
   }, [today]);
 
-  const hourlyCounts = Array(24).fill(0);
-  const hourlyGuests = Array(24).fill(0);
+  const timeSlotsCounts = Array(Math.ceil(totalHours * 2)).fill(0); // 30 min intervals
+  const timeSlotsGuests = Array(Math.ceil(totalHours * 2)).fill(0);
 
   bookings.forEach((b) => {
     if (b.booking_time) {
-      const hr = parseInt(b.booking_time.slice(0, 2), 10);
-      hourlyCounts[hr]++;
-      hourlyGuests[hr] += b.guests;
+      const [hoursStr, minutesStr] = b.booking_time.split(':');
+      const hours = parseInt(hoursStr, 10);
+      const minutes = parseInt(minutesStr, 10);
+      const decimalTime = hours + minutes / 60;
+
+      if (decimalTime >= openingTimeDecimal && decimalTime < closingTimeDecimal) {
+        const slotIndex = Math.floor((decimalTime - openingTimeDecimal) * 2);
+        timeSlotsCounts[slotIndex]++;
+        timeSlotsGuests[slotIndex] += b.guests;
+      }
     }
   });
 
-  console.log("Final bookings:", bookings);
-  console.log("Hourly counts:", hourlyCounts);
-  console.log("Hourly guests:", hourlyGuests);
-
-  const data = hourlyCounts.map((count, i) => ({
-    hour: String(i).padStart(2, "0") + ":00",
-    bookings: count,
-    guests: hourlyGuests[i],
-  }));
+  const chartData = timeSlotsCounts.map((count, i) => {
+    const decimalHour = openingTimeDecimal + i / 2;
+    const hour = Math.floor(decimalHour);
+    const minute = (decimalHour - hour) * 60;
+    const date = new Date();
+    date.setHours(hour, minute, 0);
+    return {
+      time: format(date, 'h:mm a'),
+      bookings: count,
+      guests: timeSlotsGuests[i],
+      rawTime: decimalHour, // for sorting
+    };
+  });
 
   return (
     <div className="p-8 space-y-6">
       <h1 className="text-2xl font-bold text-center">
-        <h1 className="text-2xl font-bold">
-          Analytics{" "}
-          <span className="font-normal text-gray-600">(Today: {today})</span>
-        </h1>
+        Analytics{" "}
+        <span className="font-normal text-gray-600">(Today: {today})</span>
       </h1>
 
       {/* BOOKINGS CHART */}
       <Card>
         <CardHeader>
-          <CardTitle>Bookings by Hour</CardTitle>
+          <CardTitle>Bookings by Time Slot ({format(new Date(0, 0, 0, Math.floor(openingTimeDecimal), (openingTimeDecimal - Math.floor(openingTimeDecimal)) * 60), 'h:mm a')} - {format(new Date(0, 0, 0, Math.floor(closingTimeDecimal), (closingTimeDecimal - Math.floor(closingTimeDecimal)) * 60), 'h:mm a')})</CardTitle>
           <CardDescription>Today's reservations</CardDescription>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={data}>
-              <XAxis dataKey="hour" />
+            <BarChart data={chartData}>
+              <XAxis dataKey="time" />
               <YAxis />
               <Tooltip />
               <Bar dataKey="bookings" fill="#6366f1" />
@@ -109,13 +125,13 @@ export default function PopularTimesView() {
       {/* GUESTS CHART */}
       <Card>
         <CardHeader>
-          <CardTitle>Guest Count by Hour</CardTitle>
+          <CardTitle>Guest Count by Time Slot ({format(new Date(0, 0, 0, Math.floor(openingTimeDecimal), (openingTimeDecimal - Math.floor(openingTimeDecimal)) * 60), 'h:mm a')} - {format(new Date(0, 0, 0, Math.floor(closingTimeDecimal), (closingTimeDecimal - Math.floor(closingTimeDecimal)) * 60), 'h:mm a')})</CardTitle>
           <CardDescription>Today's guests</CardDescription>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={data}>
-              <XAxis dataKey="hour" />
+            <BarChart data={chartData}>
+              <XAxis dataKey="time" />
               <YAxis />
               <Tooltip />
               <Bar dataKey="guests" fill="#10b981" />
